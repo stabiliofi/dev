@@ -25,7 +25,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
         </Box>
 
         <StaticRow
-          label="Collateral ratio"
+          label="Racional de colateral"
           inputId="trove-collateral-ratio"
           amount={collateralRatioPct.prettify()}
           color={
@@ -49,11 +49,11 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "220px" }}>
-                  The ratio between the dollar value of the collateral and the debt (in xBRL) you are
-                  depositing. While the Minimum Collateral Ratio is 110% during normal operation, it
-                  is recommended to keep the Collateral Ratio always above 150% to avoid liquidation
-                  under Recovery Mode. A Collateral Ratio above 200% or 250% is recommended for
-                  additional safety.
+                  O racional de proporção entre o valor em Reais do colateral e a dívida (em xBRL) que você está
+                  depositando. Enquanto o racional (proporção) entre a quantidade de colateral depositado e o montande 
+                  de xBRL emitidos for de 110% durante o Modo Normal de operação, recomenda-se manter o racional de 
+                  colateral sempre acima de 150% para evitar liquidação quanto o sistema entrar em Modo de Rrecuperação. 
+                  Um racional de colateral (proporção) acima de 200% ou 250% é recomendada para se ter uma segurança adicional.
                 </Card>
               }
             />
@@ -62,7 +62,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
       </Flex>
       {value?.lt(1.5) && (
         <ActionDescription>
-          Keeping your CR above 150% can help avoid liquidation under Recovery Mode.
+          Manter seu Racional de Colateral acima de 150% pode ajudar a evitar a liquidação quando o sistema entrar no Modo de Recuperação.
         </ActionDescription>
       )}
     </>

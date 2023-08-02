@@ -21,15 +21,15 @@ export const Disabled: React.FC = () => {
     <Card>
       <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
         <Heading sx={{ fontSize: 16  }}>
-          ETH/xBRL Uniswap LP
+          ETH/xBRL LP no Uniswap
         </Heading>
         <Flex sx={{ justifyContent: "flex-end" }}>
           <RemainingSTBL />
         </Flex>
       </Flex>
       <Box sx={{ p: [2, 3] }}>
-        <InfoMessage title="Liquidity farming period has finished">
-          <Flex>There are no more STBL rewards left to farm</Flex>
+        <InfoMessage title="O período de incentivo de liquidez terminou">
+          <Flex>Não há mais recompensas STBL de incentivo</Flex>
         </InfoMessage>
         {hasStake && (
           <>
@@ -41,7 +41,7 @@ export const Disabled: React.FC = () => {
                 unit={LP}
               />
               <StaticRow
-                label="Reward"
+                label="Recompensa"
                 inputId="farm-reward"
                 amount={xbrlWethLiquidityMiningSTBLReward.prettify(4)}
                 color={xbrlWethLiquidityMiningSTBLReward.nonZero && "success"}

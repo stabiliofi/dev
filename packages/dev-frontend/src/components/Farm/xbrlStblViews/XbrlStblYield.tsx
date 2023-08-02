@@ -54,18 +54,18 @@ export const XbrlStblYield: React.FC = () => {
   return (
     <Badge>
       <Text>
-        {daysRemaining?.prettify(0)} day yield {yieldPercentage.toString(2)}%
+        {daysRemaining?.prettify(0)} rendimento diário de {yieldPercentage.toString(2)}%
       </Text>
       <InfoIcon
         tooltip={
           <Card variant="tooltip" sx={{ minWidth: ["auto", "352px"] }}>
             <Paragraph>
-              An <Text sx={{ fontWeight: "bold" }}>estimate</Text> of the STBL return on staked UNI
-              LP tokens. The farm runs for 6-weeks, and the return is relative to the time remaining.
+              Uma <Text sx={{ fontWeight: "bold" }}>estimativa</Text> do retorno de STBLs pelos token LP UNI em stake. 
+              O período de incentivo dura 8 semanas e o retorno é relativo ao tempo restante.
             </Paragraph>
             <Paragraph sx={{ fontSize: "12px", fontFamily: "monospace", mt: 2 }}>
               ($STBL_REWARDS / $STAKED_UNI_LP) * 100 ={" "}
-              <Text sx={{ fontWeight: "bold" }}> Yield</Text>
+              <Text sx={{ fontWeight: "bold" }}> Rendimento</Text>
             </Paragraph>
             <Paragraph sx={{ fontSize: "12px", fontFamily: "monospace" }}>
               ($

@@ -50,21 +50,21 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
 
   return (
     <Card>
-      <Heading>Trove</Heading>
+      <Heading>Depósito</Heading>
 
       <Box sx={{ p: [2, 3] }}>
         <StaticRow
-          label="Collateral"
+          label="Colateral"
           inputId="trove-collateral"
           amount={edited.collateral.prettify(4)}
           unit="ETH"
         />
 
-        <StaticRow label="Debt" inputId="trove-debt" amount={edited.debt.prettify()} unit={COIN} />
+        <StaticRow label="Dívida" inputId="trove-debt" amount={edited.debt.prettify()} unit={COIN} />
 
         {original.isEmpty && (
           <StaticRow
-            label="Liquidation Reserve"
+            label="Reserva de Liquidação"
             inputId="trove-liquidation-reserve"
             amount={`${XBRL_LIQUIDATION_RESERVE}`}
             unit={COIN}
@@ -72,9 +72,9 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
               <InfoIcon
                 tooltip={
                   <Card variant="tooltip" sx={{ width: "200px" }}>
-                    An amount set aside to cover the liquidator’s gas costs if your Trove needs to be
-                    liquidated. The amount increases your debt and is refunded if you close your
-                    Trove by fully paying off its net debt.
+                   Uma quantia reservada para cobrir os custos de gás do usuário que realizar a liquidação
+                  se o seu Depósito precisar ser liquidado. O valor aumenta sua dívida e é reembolsado se 
+                  você fechar seu Depósito quitando integralmente sua dívida líquida.
                   </Card>
                 }
               />
@@ -83,7 +83,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
         )}
 
         <StaticRow
-          label="Borrowing Fee"
+          label="Taxa de empréstimo"
           inputId="trove-borrowing-fee"
           amount={fee.toString(2)}
           pendingAmount={feePct.toString(2)}
@@ -92,8 +92,8 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time fee. There are no
-                  recurring fees for borrowing, which is thus interest-free.
+                  Este montante é deduzido do montante emprestado como uma taxa única. Não há
+                  taxas recorrentes para empréstimos, que são, portanto, sem juros.
                 </Card>
               }
             />

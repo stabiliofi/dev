@@ -21,21 +21,21 @@ export const RedemptionPage: React.FC = () => {
       <Container variant="left">
         <Card>
           <Box sx={{ p: [2, 3] }}>
-            <InfoMessage title="Bot functionality">
+            <InfoMessage title="Funcionalidade Bot">
               <Paragraph>
-                Redemptions are expected to be carried out by bots when arbitrage opportunities
-                emerge.
+                Espera-se que os resgates sejam realizados por bots quando as oportunidades de arbitragem
+                emergir.
               </Paragraph>
               <Paragraph sx={{ mt: 2 }}>
-                Most of the time you will get a better rate for converting xBRL to ETH on{" "}
+                Na maioria das vezes, você obterá uma taxa melhor para converter xBRL em ETH no{" "}
                 <Link href={uniLink(addresses["xbrlToken"])} target="_blank">
                   Uniswap <Icon name="external-link-alt" size="xs" />
                 </Link>{" "}
-                or other exchanges.
+                ou em outras exchanges.
               </Paragraph>
               <Paragraph sx={{ mt: 2 }}>
-                <strong>Note</strong>: Redemption is not for repaying your loan. To repay your loan,
-                adjust your Trove on the <Link href="#/">Dashboard</Link>.
+                <strong>Observação</strong>: O resgate de colateral não é para reembolsar seu empréstimo. Para pagar sua dívida de
+                empréstimo. Ajuste seu Depósito no <Link href="#/">Dasboard</Link>.
               </Paragraph>
             </InfoMessage>
           </Box>

@@ -10,11 +10,11 @@ export const RiskyTrovesPage: React.FC = () => (
     <Container variant="left">
       <Card>
         <Box sx={{ p: [2, 3] }}>
-          <InfoMessage title="Bot functionality">
-            <Paragraph>Liquidation is expected to be carried out by bots.</Paragraph>
+          <InfoMessage title="Funcionalidade Bot">
+          <Paragraph>Espera-se que a liquidação seja realizada por bots.</Paragraph>
             <Paragraph>
-              Early on you may be able to manually liquidate Troves, but as the system matures this
-              will become less likely.
+              No início, você pode liquidar Troves manualmente, mas à medida que o sistema amadurece, isso
+              será menos provável.
             </Paragraph>
           </InfoMessage>
         </Box>

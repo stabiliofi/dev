@@ -16,11 +16,11 @@ export const XbrlStblValidation: React.FC<ValidationProps> = ({ amount }) => {
   }
 
   if (!hasApproved) {
-    return <ErrorDescription>You haven't approved enough {LP}</ErrorDescription>;
+    return <ErrorDescription>Você não aprovou o suficiente {LP}</ErrorDescription>;
   }
 
   if (!hasEnoughUniToken) {
-    return <ErrorDescription>You don't have enough {LP}</ErrorDescription>;
+    return <ErrorDescription>Você não tem o suficiente {LP}</ErrorDescription>;
   }
 
   return null;

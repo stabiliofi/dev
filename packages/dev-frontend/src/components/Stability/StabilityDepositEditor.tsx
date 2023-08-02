@@ -58,7 +58,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
   return (
     <Card>
       <Heading>
-        Stability Pool
+        Fundo de Estabilidade
         {edited && !changePending && (
           <Button
             variant="titleIcon"
@@ -72,7 +72,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
 
       <Box sx={{ p: [2, 3] }}>
         <EditableRow
-          label="Deposit"
+          label="Depósito"
           inputId="deposit-stbl"
           amount={editedXBRL.prettify()}
           maxAmount={maxAmount.toString()}
@@ -84,10 +84,10 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
         />
 
         {newPoolShare.infinite ? (
-          <StaticRow label="Pool share" inputId="deposit-share" amount="N/A" />
+          <StaticRow label="Sua proporção no fundo" inputId="deposit-share" amount="N/A" />
         ) : (
           <StaticRow
-            label="Pool share"
+            label="Sua proporção no fundo"
             inputId="deposit-share"
             amount={newPoolShare.prettify(4)}
             pendingAmount={poolShareChange?.prettify(4).concat("%")}
@@ -99,7 +99,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
         {!originalDeposit.isEmpty && (
           <>
             <StaticRow
-              label="Liquidation gain"
+              label="Ganhos de liquidações"
               inputId="deposit-gain"
               amount={originalDeposit.collateralGain.prettify(4)}
               color={originalDeposit.collateralGain.nonZero && "success"}
@@ -107,7 +107,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
             />
 
             <StaticRow
-              label="Reward"
+              label="Recompensa"
               inputId="deposit-reward"
               amount={originalDeposit.stblReward.prettify()}
               color={originalDeposit.stblReward.nonZero && "success"}
@@ -116,9 +116,9 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
                 <InfoIcon
                   tooltip={
                     <Card variant="tooltip" sx={{ width: "240px" }}>
-                      Although the STBL rewards accrue every minute, the value on the UI only updates
-                      when a user transacts with the Stability Pool. Therefore you may receive more
-                      rewards than is displayed when you claim or adjust your deposit.
+                      Embora as recompensas de STBL sejam acumuladas a cada minuto, o valor na interface do usuário é atualizado apenas
+                      quando um usuário faz transações no Fundo de Estabilidade. Portanto, você pode receber mais
+                      recompensas do que é exibido quando você reivindica ou ajusta seu depósito.
                     </Card>
                   }
                 />

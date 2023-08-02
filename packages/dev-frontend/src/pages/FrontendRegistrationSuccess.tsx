@@ -33,12 +33,12 @@ export const FrontendRegistrationSuccess: React.FC<FrontendRegistrationSuccessPr
     >
       <Flex sx={{ alignItems: "center", mx: 3, mb: 4, fontSize: 5 }}>
         <Icon name="check" />
-        <Heading sx={{ ml: 3, fontSize: 4 }}>Success!</Heading>
+        <Heading sx={{ ml: 3, fontSize: 4 }}>Successo!</Heading>
       </Flex>
 
-      <Paragraph sx={{ fontSize: 2 }}>Your frontend is now ready to receive STBL rewards.</Paragraph>
+      <Paragraph sx={{ fontSize: 2 }}>Seu frontend agora está pronto para receber recompensas em STBL.</Paragraph>
     </Box>
 
-    <Button onClick={onDismiss}>Go to Dashboard</Button>
+    <Button onClick={onDismiss}>Ir para o Dashboard</Button>
   </>
 );

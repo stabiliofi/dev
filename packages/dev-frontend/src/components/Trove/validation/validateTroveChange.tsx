@@ -29,51 +29,51 @@ const TroveChangeDescription: React.FC<TroveAdjustmentDescriptionParams> = ({ pa
   <ActionDescription>
     {params.depositCollateral && params.borrowXBRL ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount> and receive{" "}
+        Você vai depositar <Amount>{params.depositCollateral.prettify()} ETH</Amount> e receber{" "}
         <Amount>
           {params.borrowXBRL.prettify()} {COIN}
         </Amount>
       </>
     ) : params.repayXBRL && params.withdrawCollateral ? (
       <>
-        You will pay{" "}
+        Você vai pagar{" "}
         <Amount>
           {params.repayXBRL.prettify()} {COIN}
         </Amount>{" "}
-        and receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
+        e receber <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
       </>
     ) : params.depositCollateral && params.repayXBRL ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount> and pay{" "}
+        Você vai depositar <Amount>{params.depositCollateral.prettify()} ETH</Amount> e pagar{" "}
         <Amount>
           {params.repayXBRL.prettify()} {COIN}
         </Amount>
       </>
     ) : params.borrowXBRL && params.withdrawCollateral ? (
       <>
-        You will receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount> and{" "}
+        Você vai receber <Amount>{params.withdrawCollateral.prettify()} ETH</Amount> e{" "}
         <Amount>
           {params.borrowXBRL.prettify()} {COIN}
         </Amount>
       </>
     ) : params.depositCollateral ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount>
+        Você vai depositar <Amount>{params.depositCollateral.prettify()} ETH</Amount>
       </>
     ) : params.withdrawCollateral ? (
       <>
-        You will receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
+        Você vai receber <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
       </>
     ) : params.borrowXBRL ? (
       <>
-        You will receive{" "}
+        Você vai receber{" "}
         <Amount>
           {params.borrowXBRL.prettify()} {COIN}
         </Amount>
       </>
     ) : (
       <>
-        You will pay{" "}
+        VocÊ vai pagar{" "}
         <Amount>
           {params.repayXBRL.prettify()} {COIN}
         </Amount>
@@ -138,7 +138,7 @@ export const validateTroveChange = (
     return [
       undefined,
       <ErrorDescription>
-        Total debt must be at least{" "}
+        A dívida total deve ser pelo menos{" "}
         <Amount>
           {XBRL_MINIMUM_DEBT.toString()} {COIN}
         </Amount>
@@ -174,7 +174,7 @@ const validateTroveCreation = (
   if (borrowXBRL.lt(XBRL_MINIMUM_NET_DEBT)) {
     return (
       <ErrorDescription>
-        You must borrow at least{" "}
+        Você deve fazer empréstimo de pelo menos{" "}
         <Amount>
           {XBRL_MINIMUM_NET_DEBT.toString()} {COIN}
         </Amount>
@@ -187,8 +187,8 @@ const validateTroveCreation = (
     if (!resultingTrove.isOpenableInRecoveryMode(price)) {
       return (
         <ErrorDescription>
-          You're not allowed to open a Trove with less than <Amount>{ccrPercent}</Amount> Collateral
-          Ratio during recovery mode. Please increase your Trove's Collateral Ratio.
+          Você não tem permissão para abrir um Depósito com Racional de Colateral menor que <Amount>{ccrPercent}</Amount> 
+          durante o Modo de Recuperação. Por favor, aumente o Racional de Colateral do seu Depósito.
         </ErrorDescription>
       );
     }
@@ -196,7 +196,7 @@ const validateTroveCreation = (
     if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
       return (
         <ErrorDescription>
-          Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
+          Racional de Colateral deve ser pelo menos <Amount>{mcrPercent}</Amount>.
         </ErrorDescription>
       );
     }
@@ -204,8 +204,8 @@ const validateTroveCreation = (
     if (wouldTriggerRecoveryMode) {
       return (
         <ErrorDescription>
-          You're not allowed to open a Trove that would cause the Total Collateral Ratio to fall
-          below <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
+          Você não tem permissão para abrir um Depósito que faria com que o Racional de Colateral Total caísse
+          abaixo de <Amount>{ccrPercent}</Amount>. Por favor, aumente o Racional de Colateral do seu Depósito.
         </ErrorDescription>
       );
     }
@@ -214,7 +214,7 @@ const validateTroveCreation = (
   if (depositCollateral.gt(accountBalance)) {
     return (
       <ErrorDescription>
-        The amount you're trying to deposit exceeds your balance by{" "}
+        O valor que você está tentando depositar excede seu saldo em{" "}
         <Amount>{depositCollateral.sub(accountBalance).prettify()} ETH</Amount>.
       </ErrorDescription>
     );
@@ -239,7 +239,7 @@ const validateTroveAdjustment = (
     if (withdrawCollateral) {
       return (
         <ErrorDescription>
-          You're not allowed to withdraw collateral during recovery mode.
+          Você não tem permissão para sacar o colateral durante o Modo de Recuperação.
         </ErrorDescription>
       );
     }
@@ -248,8 +248,8 @@ const validateTroveAdjustment = (
       if (resultingTrove.collateralRatioIsBelowCritical(price)) {
         return (
           <ErrorDescription>
-            Your collateral ratio must be at least <Amount>{ccrPercent}</Amount> to borrow during
-            recovery mode. Please improve your collateral ratio.
+            Seu Racional de Colateral deve ser de pelo menos <Amount>{ccrPercent}</Amount> para abrir um depósito para poder realizar 
+            empréstimo de xBRL durante o Modo de Recuperação. Por favor, melhore seu Racional de Colateral.
           </ErrorDescription>
         );
       }
@@ -257,7 +257,7 @@ const validateTroveAdjustment = (
       if (resultingTrove.collateralRatio(price).lt(originalTrove.collateralRatio(price))) {
         return (
           <ErrorDescription>
-            You're not allowed to decrease your collateral ratio during recovery mode.
+            Você não tem permissão para diminuir seu racional de colateral durante o Modo de Recuperação.
           </ErrorDescription>
         );
       }
@@ -266,7 +266,7 @@ const validateTroveAdjustment = (
     if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
       return (
         <ErrorDescription>
-          Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
+          O racional entre a quantidade de colateral e o montante emitido de xBRL deve ser de pelo menos<Amount>{mcrPercent}</Amount>.
         </ErrorDescription>
       );
     }
@@ -274,8 +274,8 @@ const validateTroveAdjustment = (
     if (wouldTriggerRecoveryMode) {
       return (
         <ErrorDescription>
-          The adjustment you're trying to make would cause the Total Collateral Ratio to fall below{" "}
-          <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
+          O ajuste que você está tentando fazer faria com que o Racional de Colateral Total do sistema caísse abaixo de{" "}
+           <Amount>{ccrPercent}</Amount>. Por favor, aumente o racional entre a quantidade de colateral e o montante emitido de xBRL do seu Depósito.
         </ErrorDescription>
       );
     }
@@ -285,7 +285,7 @@ const validateTroveAdjustment = (
     if (resultingTrove.debt.lt(XBRL_MINIMUM_DEBT)) {
       return (
         <ErrorDescription>
-          Total debt must be at least{" "}
+          A dívida total deve ser de pelo menos{" "}
           <Amount>
             {XBRL_MINIMUM_DEBT.toString()} {COIN}
           </Amount>
@@ -297,7 +297,7 @@ const validateTroveAdjustment = (
     if (repayXBRL.gt(xbrlBalance)) {
       return (
         <ErrorDescription>
-          The amount you're trying to repay exceeds your balance by{" "}
+          O valor que você está tentando pagar excede seu saldo em{" "}
           <Amount>
             {repayXBRL.sub(xbrlBalance).prettify()} {COIN}
           </Amount>
@@ -310,7 +310,7 @@ const validateTroveAdjustment = (
   if (depositCollateral?.gt(accountBalance)) {
     return (
       <ErrorDescription>
-        The amount you're trying to deposit exceeds your balance by{" "}
+        O valor que você está tentando depositar excede seu saldo em{" "}
         <Amount>{depositCollateral.sub(accountBalance).prettify()} ETH</Amount>.
       </ErrorDescription>
     );
@@ -331,7 +331,7 @@ const validateTroveClosure = (
   if (numberOfTroves === 1) {
     return (
       <ErrorDescription>
-        You're not allowed to close your Trove when there are no other Troves in the system.
+        Você não tem permissão para fechar seu Depósito quando não houver outros Depósitos no sistema.
       </ErrorDescription>
     );
   }
@@ -339,7 +339,7 @@ const validateTroveClosure = (
   if (recoveryMode) {
     return (
       <ErrorDescription>
-        You're not allowed to close your Trove during recovery mode.
+        Você não tem permissão para fechar seu Depósito quando não houver outros Depósitos no sistema.
       </ErrorDescription>
     );
   }
@@ -347,11 +347,11 @@ const validateTroveClosure = (
   if (repayXBRL?.gt(xbrlBalance)) {
     return (
       <ErrorDescription>
-        You need{" "}
+        Você precisa de mais{" "}
         <Amount>
           {repayXBRL.sub(xbrlBalance).prettify()} {COIN}
         </Amount>{" "}
-        more to close your Trove.
+        para fechar seu depósito
       </ErrorDescription>
     );
   }
@@ -359,9 +359,9 @@ const validateTroveClosure = (
   if (wouldTriggerRecoveryMode) {
     return (
       <ErrorDescription>
-        You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to
-        fall below <Amount>{ccrPercent}</Amount>. Please wait until the Total Collateral Ratio
-        increases.
+        Você não tem permissão para fechar um Depósito se isso fizer com que o Racional de Colateral Total do sistema diminua e
+        caia abaixo de <Amount>{ccrPercent}</Amount>. Por favor, espere até que o Racional de Colateral Total do sistema
+        aumente.
       </ErrorDescription>
     );
   }

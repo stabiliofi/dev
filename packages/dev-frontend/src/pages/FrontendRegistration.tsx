@@ -23,12 +23,12 @@ const FrontendRegistrationAction: React.FC<FrontendRegistrationActionProps> = ({
   return myTransactionState.type === "waitingForApproval" ? (
     <Button disabled>
       <Spinner sx={{ mr: 2, color: "white" }} size="20px" />
-      Waiting for your approval
+      Aguardando sua aprovação
     </Button>
   ) : myTransactionState.type !== "waitingForConfirmation" &&
     myTransactionState.type !== "confirmed" ? (
     <Transaction id={myTransactionId} send={stabilio.registerFrontend.bind(stabilio, kickbackRate)}>
-      <Button>Register</Button>
+      <Button>Registrar</Button>
     </Transaction>
   ) : null;
 };
@@ -43,11 +43,11 @@ export const FrontendRegistration: React.FC = () => {
   return (
     <>
       <Card>
-        <Heading>Choose a kickback rate</Heading>
+        <Heading>Escolha uma taxa Kickback</Heading>
 
         <Box sx={{ p: [2, 3] }}>
           <Flex>
-            <Label>Kickback rate</Label>
+            <Label>Taxa Kickback</Label>
             <Label variant="unit">%</Label>
 
             <Input
@@ -93,21 +93,21 @@ export const FrontendRegistration: React.FC = () => {
       >
         <Flex sx={{ alignItems: "center", mx: 3, fontSize: 4 }}>
           <Icon name="hand-paper" />
-          <Heading sx={{ ml: 3, fontSize: "18px" }}>Before you proceed</Heading>
+          <Heading sx={{ ml: 3, fontSize: "18px" }}>Antes de prosseguir</Heading>
         </Flex>
 
         <Paragraph sx={{ fontSize: 1, mt: 3 }}>
-          You are about to register <b>{shortenAddress(account)}</b> to receive{" "}
-          <b>{cut.mul(100).toString()}%</b> of the STBL rewards earned through this frontend.
+          Você está prestes a registrar <b>{shortenAddress(account)}</b> para receber{" "}
+           <b>{cut.mul(100).toString()}%</b> das recompensas de STBL ganhas através deste frontend.
         </Paragraph>
 
         <Paragraph sx={{ fontSize: 1, mt: 3, fontWeight: "bold" }}>
-          You will not be able to change the kickback rate for this address later.
+          Você não poderá alterar a taxa KickBack para este endereço posteriormente.
         </Paragraph>
 
         <Paragraph sx={{ fontSize: 1, mt: 3 }}>
-          If you'd like to use a different kickback rate in the future, you will need to repeat this
-          registration with a different address.
+          Se quiser usar uma taxa Kickback diferente no futuro, você precisará repetir isso
+          registro com um endereço diferente.
         </Paragraph>
       </Box>
 

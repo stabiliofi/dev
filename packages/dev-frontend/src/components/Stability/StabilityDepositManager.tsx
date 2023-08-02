@@ -132,22 +132,22 @@ export const StabilityDepositManager: React.FC = () => {
     >
       {description ??
         (makingNewDeposit ? (
-          <ActionDescription>Enter the amount of {COIN} you'd like to deposit.</ActionDescription>
+          <ActionDescription>Insira o valor de {COIN} que deseja depositar.</ActionDescription>
         ) : (
-          <ActionDescription>Adjust the {COIN} amount to deposit or withdraw.</ActionDescription>
+          <ActionDescription>Ajuste o valor de {COIN} para depositar ou sacar.</ActionDescription>
         ))}
 
       <Flex variant="layout.actions">
         <Button variant="cancel" onClick={handleCancel}>
-          Cancel
+          Cancelar
         </Button>
 
         {validChange ? (
           <StabilityDepositAction transactionId={transactionId} change={validChange}>
-            Confirm
+            Confirmar
           </StabilityDepositAction>
         ) : (
-          <Button disabled>Confirm</Button>
+          <Button disabled>Confirmar</Button>
         )}
       </Flex>
     </StabilityDepositEditor>

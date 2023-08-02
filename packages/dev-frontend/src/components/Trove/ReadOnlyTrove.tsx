@@ -24,18 +24,18 @@ export const ReadOnlyTrove: React.FC = () => {
   // console.log("READONLY TROVE", trove.collateral.prettify(4));
   return (
     <Card>
-      <Heading>Trove</Heading>
+      <Heading>Depósito</Heading>
       <Box sx={{ p: [2, 3] }}>
         <Box>
           <DisabledEditableRow
-            label="Collateral"
+            label="Colateral"
             inputId="trove-collateral"
             amount={trove.collateral.prettify(4)}
             unit="ETH"
           />
 
           <DisabledEditableRow
-            label="Debt"
+            label="Dívida"
             inputId="trove-debt"
             amount={trove.debt.prettify()}
             unit={COIN}
@@ -46,11 +46,11 @@ export const ReadOnlyTrove: React.FC = () => {
 
         <Flex variant="layout.actions">
           <Button variant="outline" onClick={handleCloseTrove}>
-            Close Trove
+            Fechar Depósito
           </Button>
           <Button onClick={handleAdjustTrove}>
             <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+            &nbsp;Ajustar
           </Button>
         </Flex>
       </Box>

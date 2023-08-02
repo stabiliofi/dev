@@ -127,11 +127,11 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
           {isMetaMask ? (
             <>
               <MetaMaskIcon />
-              <Box sx={{ ml: 2 }}>Connect to MetaMask</Box>
+              <Box sx={{ ml: 2 }}>Conectar com Metamask</Box>
             </>
           ) : (
             <>
-              <Box sx={{ ml: 2 }}>Connect wallet</Box>
+              <Box sx={{ ml: 2 }}>Conectar carteira</Box>
             </>
           )}
         </Button>
@@ -140,7 +140,7 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
       {connectionState.type === "failed" && (
         <Modal>
           <RetryDialog
-            title={isMetaMask ? "Failed to connect to MetaMask" : "Failed to connect wallet"}
+            title={isMetaMask ? "Falha ao conectar ao MetaMask" : "Falha ao conectar a carteira"}
             onCancel={() => dispatch({ type: "cancel" })}
             onRetry={() => {
               dispatch({ type: "retry" });
@@ -148,10 +148,10 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
             }}
           >
             <Box sx={{ textAlign: "center" }}>
-              You might need to install MetaMask or use a different browser.
+              Pode ser necessário instalar o MetaMask ou usar um navegador diferente.
             </Box>
             <Link sx={{ lineHeight: 3 }} href="https://metamask.io/download.html" target="_blank">
-              Learn more <Icon size="xs" name="external-link-alt" />
+              Aprenda mais <Icon size="xs" name="external-link-alt" />
             </Link>
           </RetryDialog>
         </Modal>
@@ -161,17 +161,17 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
         <Modal>
           <ConnectionConfirmationDialog
             title={
-              isMetaMask ? "Confirm connection in MetaMask" : "Confirm connection in your wallet"
+              isMetaMask ? "Confirme a conexão no MetaMask" : "Confirme a conexão em sua carteira"
             }
             icon={isMetaMask ? <MetaMaskIcon /> : <Icon name="wallet" size="lg" />}
             onCancel={() => dispatch({ type: "cancel" })}
           >
             <Text sx={{ textAlign: "center" }}>
-              Confirm the request that&apos;s just appeared.
+            Confirme a solicitação que acabou de aparecer.
               {isMetaMask ? (
-                <> If you can&apos;t see a request, open your MetaMask extension via your browser.</>
+                <> Se você não conseguir ver uma solicitação, abra sua extensão MetaMask por meio de seu navegador.</>
               ) : (
-                <> If you can&apos;t see a request, you might have to open your wallet.</>
+                <> Se você não conseguir ver uma solicitação, talvez seja necessário abrir sua carteira.</>
               )}
             </Text>
           </ConnectionConfirmationDialog>
@@ -181,14 +181,14 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
       {connectionState.type === "rejectedByUser" && (
         <Modal>
           <RetryDialog
-            title="Cancel connection?"
+            title="Cancelar conexão?"
             onCancel={() => dispatch({ type: "cancel" })}
             onRetry={() => {
               dispatch({ type: "retry" });
               activate(connectionState.connector);
             }}
           >
-            <Text>To use Stabilio, you need to connect your Ethereum account.</Text>
+            <Text>Para usar o Stabilio, você precisa conectar sua conta Ethereum.</Text>
           </RetryDialog>
         </Modal>
       )}
@@ -196,14 +196,14 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
       {connectionState.type === "alreadyPending" && (
         <Modal>
           <RetryDialog
-            title="Connection already requested"
+            title="Conexão já solicitada"
             onCancel={() => dispatch({ type: "cancel" })}
             onRetry={() => {
               dispatch({ type: "retry" });
               activate(connectionState.connector);
             }}
           >
-            <Text>Please check your wallet and accept the connection request before retrying.</Text>
+            <Text>Verifique sua carteira e aceite a solicitação de conexão antes de tentar novamente.</Text>
           </RetryDialog>
         </Modal>
       )}

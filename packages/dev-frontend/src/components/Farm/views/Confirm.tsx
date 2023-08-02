@@ -40,7 +40,7 @@ export const Confirm: React.FC<ConfirmProps> = ({ amount }) => {
       showFailure="asTooltip"
       tooltipPlacement="bottom"
     >
-      <Button disabled={shouldDisable}>Confirm</Button>
+      <Button disabled={shouldDisable}>Confirmar</Button>
     </Transaction>
   );
 };

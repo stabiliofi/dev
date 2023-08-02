@@ -40,7 +40,7 @@ export const XbrlStblConfirm: React.FC<XbrlStblConfirmProps> = ({ amount }) => {
       showFailure="asTooltip"
       tooltipPlacement="bottom"
     >
-      <Button disabled={shouldDisable}>Confirm</Button>
+      <Button disabled={shouldDisable}>Confirmar</Button>
     </Transaction>
   );
 };

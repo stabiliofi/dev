@@ -43,18 +43,18 @@ export const Yield: React.FC = () => {
 
   return (
     <Badge>
-      <Text>STBL APR {aprPercentage.toString(2)}%</Text>
+      <Text>Retorno anual de STBL {aprPercentage.toString(2)}%</Text>
       <InfoIcon
         tooltip={
           <Card variant="tooltip" sx={{ width: ["220px", "518px"] }}>
             <Paragraph>
-              An <Text sx={{ fontWeight: "bold" }}>estimate</Text> of the STBL return on the xBRL
-              deposited to the Stability Pool over the next year, not including your ETH gains from
-              liquidations.
+              Uma <Text sx={{ fontWeight: "bold" }}>estimativa</Text> do retorno STBL pelo xBRL
+              depositado no Fundo de Estabilidade no próiximo ano, não incluindo seus ganhos de ETH de
+              liquidações.
             </Paragraph>
             <Paragraph sx={{ fontSize: "12px", fontFamily: "monospace", mt: 2 }}>
               ($STBL_REWARDS * DAILY_ISSUANCE% / DEPOSITED_XBRL) * 365 * 100 ={" "}
-              <Text sx={{ fontWeight: "bold" }}> APR</Text>
+              <Text sx={{ fontWeight: "bold" }}> ao ano (APR)</Text>
             </Paragraph>
             <Paragraph sx={{ fontSize: "12px", fontFamily: "monospace" }}>
               ($

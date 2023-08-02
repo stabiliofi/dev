@@ -427,12 +427,12 @@ export const TransactionMonitor: React.FC = () => {
 
       <Text sx={{ fontSize: 3, color: "white" }}>
         {transactionState.type === "waitingForConfirmation"
-          ? "Waiting for confirmation"
+          ? "Aguardando por confirmação"
           : transactionState.type === "cancelled"
-          ? "Cancelled"
+          ? "Cancelado"
           : transactionState.type === "failed"
           ? transactionState.error.message
-          : "Confirmed"}
+          : "Confirmado"}
       </Text>
     </Flex>
   );

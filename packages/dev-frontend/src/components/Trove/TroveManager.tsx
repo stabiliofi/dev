@@ -217,17 +217,17 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
       {description ??
         (openingNewTrove ? (
           <ActionDescription>
-            Start by entering the amount of ETH you'd like to deposit as collateral.
+            Comece inserindo a quantidade de ETH que você gostaria de depositar como colateral de garantia.
           </ActionDescription>
         ) : (
           <ActionDescription>
-            Adjust your Trove by modifying its collateral, debt, or both.
+            Ajuste seu Depósito modificando a quantidade de colateral depositado, seu montante de dívida ou ambos.
           </ActionDescription>
         ))}
 
       <Flex variant="layout.actions">
         <Button variant="cancel" onClick={handleCancel}>
-          Cancel
+          Cancelar
         </Button>
 
         {validChange ? (
@@ -237,10 +237,10 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
             maxBorrowingRate={maxBorrowingRate}
             borrowingFeeDecayToleranceMinutes={60}
           >
-            Confirm
+            Confirmar
           </TroveAction>
         ) : (
-          <Button disabled>Confirm</Button>
+          <Button disabled>Confirmar</Button>
         )}
       </Flex>
     </TroveEditor>

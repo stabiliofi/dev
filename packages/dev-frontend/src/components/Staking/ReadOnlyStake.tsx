@@ -25,7 +25,7 @@ export const ReadOnlyStake: React.FC = () => {
 
   return (
     <Card>
-      <Heading>Staking</Heading>
+      <Heading>Staking de STBL</Heading>
 
       <Box sx={{ p: [2, 3] }}>
         <DisabledEditableRow
@@ -36,14 +36,14 @@ export const ReadOnlyStake: React.FC = () => {
         />
 
         <StaticRow
-          label="Pool share"
+          label="Sua proporção no fundo"
           inputId="stake-share"
           amount={poolShare.prettify(4)}
           unit="%"
         />
 
         <StaticRow
-          label="Redemption gain"
+          label="Ganhos por taxa de resgate"
           inputId="stake-gain-eth"
           amount={stblStake.collateralGain.prettify(4)}
           color={stblStake.collateralGain.nonZero && "success"}
@@ -51,7 +51,7 @@ export const ReadOnlyStake: React.FC = () => {
         />
 
         <StaticRow
-          label="Issuance gain"
+          label="Ganhos por taxa de emissão"
           inputId="stake-gain-xbrl"
           amount={stblStake.xbrlGain.prettify()}
           color={stblStake.xbrlGain.nonZero && "success"}
@@ -61,7 +61,7 @@ export const ReadOnlyStake: React.FC = () => {
         <Flex variant="layout.actions">
           <Button variant="outline" onClick={() => dispatch({ type: "startAdjusting" })}>
             <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+            &nbsp;Ajustar
           </Button>
 
           <StakingGainsAction />

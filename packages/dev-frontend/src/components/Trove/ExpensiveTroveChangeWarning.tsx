@@ -47,7 +47,7 @@ export const ExpensiveTroveChangeWarning: React.FC<ExpensiveTroveChangeWarningPa
         if (!cancelled) {
           setGasEstimationState({ type: "complete", populatedTx });
           console.log(
-            "Estimated TX cost: " +
+            "Custo estimado de transação: " +
               Decimal.from(`${populatedTx.rawPopulatedTransaction.gasLimit}`).prettify(0)
           );
         }
@@ -71,13 +71,13 @@ export const ExpensiveTroveChangeWarning: React.FC<ExpensiveTroveChangeWarningPa
   ) {
     return troveChange.type === "creation" ? (
       <Warning>
-        The cost of opening a Trove in this collateral ratio range is rather high. To lower it,
-        choose a slightly different collateral ratio.
+        O custo de abertura de um Depósito nesta faixa de Racional de Collateral é bastante alto. Para baixá-lo,
+        escolha um racional proporcional ligeiramente diferente.
       </Warning>
     ) : (
       <Warning>
-        The cost of adjusting a Trove into this collateral ratio range is rather high. To lower it,
-        choose a slightly different collateral ratio.
+        O custo de ajustar um Depósito a essa faixa de Racional de Collateral é bastante alto. Para baixá-lo,
+        escolha um racional proporcional ligeiramente diferente.
       </Warning>
     );
   }

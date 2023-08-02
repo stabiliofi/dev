@@ -48,7 +48,7 @@ export const Active: React.FC = () => {
     <Card>
       <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
         <Heading sx={{ fontSize: 16  }}>
-          ETH/xBRL Uniswap LP
+          ETH/xBRL LP no Uniswap
         </Heading>
         {!isTransactionPending && (
           <Flex sx={{ justifyContent: "flex-end" }}>
@@ -65,10 +65,10 @@ export const Active: React.FC = () => {
             unit={LP}
           />
           {poolShare.infinite ? (
-            <StaticRow label="Pool share" inputId="farm-share" amount="N/A" />
+            <StaticRow label="Sua proporção no fundo" inputId="farm-share" amount="N/A" />
           ) : (
             <StaticRow
-              label="Pool share"
+              label="Sua proporção no fundo"
               inputId="farm-share"
               amount={poolShare.prettify(4)}
               unit={"%"}
@@ -76,7 +76,7 @@ export const Active: React.FC = () => {
           )}
           <Flex sx={{ alignItems: "center" }}>
             <StaticRow
-              label="Reward"
+              label="Recompensa"
               inputId="farm-reward"
               amount={xbrlWethLiquidityMiningSTBLReward.prettify(4)}
               color={xbrlWethLiquidityMiningSTBLReward.nonZero && "success"}
@@ -94,7 +94,7 @@ export const Active: React.FC = () => {
             onClick={handleAdjustPressed}
           >
             <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+            &nbsp;Ajustar
           </Button>
           {!xbrlWethLiquidityMiningSTBLReward.isZero && <ClaimReward />}
         </Flex>

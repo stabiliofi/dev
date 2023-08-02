@@ -25,7 +25,7 @@ import { Abbreviation } from "./Abbreviation";
 const rowHeight = "40px";
 
 const liquidatableInNormalMode = (trove: UserTrove, price: Decimal) =>
-  [trove.collateralRatioIsBelowMinimum(price), "Collateral ratio not low enough"] as const;
+  [trove.collateralRatioIsBelowMinimum(price), "Racional de colateral não é baixo o suficiente"] as const;
 
 const liquidatableInRecoveryMode = (
   trove: UserTrove,
@@ -38,7 +38,7 @@ const liquidatableInRecoveryMode = (
   if (collateralRatio.gte(MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
     return [
       trove.debt.lte(xbrlInStabilityPool),
-      "There's not enough xBRL in the Stability pool to cover the debt"
+      "Não há xBRL suficiente no Fundo de Estabilidade para cobrir a dívida"
     ] as const;
   } else {
     return liquidatableInNormalMode(trove, price);
@@ -156,7 +156,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
   return (
     <Card sx={{ width: "100%" }}>
       <Heading>
-        <Abbreviation short="Troves">Risky Troves</Abbreviation>
+        <Abbreviation short="Troves">Depósitos Arriscados</Abbreviation>
 
         <Flex sx={{ alignItems: "center" }}>
           {numberOfTroves !== 0 && (
@@ -196,7 +196,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
       {!troves || troves.length === 0 ? (
         <Box sx={{ p: [2, 3] }}>
           <Box sx={{ p: 4, fontSize: 3, textAlign: "center" }}>
-            {!troves ? "Loading..." : "There are no Troves yet"}
+            {!troves ? "Carregando..." : "Ainda não há Depósitos"}
           </Box>
         </Box>
       ) : (
@@ -222,19 +222,19 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
 
             <thead>
               <tr>
-                <th>Owner</th>
+                <th>Depositante</th>
                 <th>
-                  <Abbreviation short="Coll.">Collateral</Abbreviation>
+                  <Abbreviation short="Coll.">Colateral</Abbreviation>
                   <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>ETH</Box>
                 </th>
                 <th>
-                  Debt
+                  Dívida
                   <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>{COIN}</Box>
                 </th>
                 <th>
-                  Coll.
+                  Racional de
                   <br />
-                  Ratio
+                  Col.
                 </th>
                 <th></th>
               </tr>
@@ -318,7 +318,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                       <td>
                         <Transaction
                           id={`liquidate-${trove.ownerAddress}`}
-                          tooltip="Liquidate"
+                          tooltip="Liquidar"
                           requires={[
                             recoveryMode
                               ? liquidatableInRecoveryMode(

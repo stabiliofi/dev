@@ -13,7 +13,7 @@ export const XbrlStblRemainingSTBL: React.FC = () => {
 
   return (
     <Flex sx={{ mr: 2, fontSize: 2, fontWeight: "medium" }}>
-      {remainingXbrlStblLiquidityMiningSTBLReward.prettify(0)} STBL remaining
+      {remainingXbrlStblLiquidityMiningSTBLReward.prettify(0)} STBL restantes
     </Flex>
   );
 };

@@ -14,11 +14,11 @@ export const LiquidationManager: React.FC = () => {
 
   return (
     <Card>
-      <Heading>Liquidate</Heading>
+      <Heading>Liquidar</Heading>
 
       <Box sx={{ p: [2, 3] }}>
         <Flex sx={{ alignItems: "stretch" }}>
-          <Label>Up to</Label>
+          <Label>Até</Label>
 
           <Input
             type="number"
@@ -28,12 +28,12 @@ export const LiquidationManager: React.FC = () => {
             onChange={e => setNumberOfTrovesToLiquidate(e.target.value)}
           />
 
-          <Label>Troves</Label>
+          <Label>Depósitos</Label>
 
           <Flex sx={{ ml: 2, alignItems: "center" }}>
             <Transaction
               id="batch-liquidate"
-              tooltip="Liquidate"
+              tooltip="Liquidar"
               tooltipPlacement="bottom"
               send={overrides => {
                 if (!numberOfTrovesToLiquidate) {

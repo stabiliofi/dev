@@ -28,12 +28,12 @@ export const UnregisteredFrontend: React.FC = () => {
     >
       <Flex sx={{ alignItems: "center", mx: 3, mb: 2 }}>
         <Icon name="exclamation-triangle" size="2x" />
-        <Heading sx={{ ml: 3, fontSize: "18px" }}>Frontend not yet registered</Heading>
+        <Heading sx={{ ml: 3, fontSize: "18px" }}>Frontend ainda não registrado</Heading>
       </Flex>
 
       <Paragraph sx={{ fontSize: 2 }}>
-        If you're the operator of this frontend, please select <b>{shortenAddress(frontendTag)}</b>{" "}
-        in your wallet to proceed with the registration.
+        Se você for o operador deste frontend, selecione <b>{shortenAddress(frontendTag)}</b>{" "}
+        em sua carteira para prosseguir com o registro.
       </Paragraph>
     </Box>
   );

@@ -15,21 +15,21 @@ export const NoDeposit: React.FC = props => {
   return (
     <Card>
       <Heading>
-        Stability Pool
+        Fundo de Estabilidade
         <Flex sx={{ justifyContent: "flex-end" }}>
           <RemainingSTBL />
         </Flex>
       </Heading>
       <Box sx={{ p: [2, 3] }}>
-        <InfoMessage title="You have no xBRL in the Stability Pool.">
-          You can earn ETH and STBL rewards by depositing xBRL.
+        <InfoMessage title="Você não tem xBRL no Fundo de Estabilidade.">
+          Você pode ganhar recompensas ETH e STBL depositando xBRL.
         </InfoMessage>
 
         <Flex variant="layout.actions">
           <Flex sx={{ justifyContent: "flex-start", flex: 1, alignItems: "center" }}>
             <Yield />
           </Flex>
-          <Button onClick={handleOpenTrove}>Deposit</Button>
+          <Button onClick={handleOpenTrove}>Depositar</Button>
         </Flex>
       </Box>
     </Card>

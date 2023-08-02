@@ -79,7 +79,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
           <StaticRow label="Pool share" inputId="stake-share" amount="N/A" />
         ) : (
           <StaticRow
-            label="Pool share"
+            label="Sua proporção no fundo"
             inputId="stake-share"
             amount={newPoolShare.prettify(4)}
             pendingAmount={poolShareChange?.prettify(4).concat("%")}
@@ -91,7 +91,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
         {!originalStake.isEmpty && (
           <>
             <StaticRow
-              label="Redemption gain"
+              label="Ganhos por taxa de resgate"
               inputId="stake-gain-eth"
               amount={originalStake.collateralGain.prettify(4)}
               color={originalStake.collateralGain.nonZero && "success"}
@@ -99,7 +99,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
             />
 
             <StaticRow
-              label="Issuance gain"
+              label="Ganhos por taxa de emissão"
               inputId="stake-gain-xbrl"
               amount={originalStake.xbrlGain.prettify()}
               color={originalStake.xbrlGain.nonZero && "success"}

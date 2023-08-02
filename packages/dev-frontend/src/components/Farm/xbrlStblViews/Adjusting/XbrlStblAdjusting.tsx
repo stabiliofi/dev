@@ -65,7 +65,7 @@ export const XbrlStblAdjusting: React.FC = () => {
     <Card>
       <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
         <Heading sx={{ fontSize: 16  }}>
-          STBL/xBRL Uniswap LP
+          STBL/xBRL LP no Uniswap
         </Heading>
         {isDirty && !isTransactionPending && (
           <Button
@@ -92,10 +92,10 @@ export const XbrlStblAdjusting: React.FC = () => {
         ></EditableRow>
 
         {poolShare.infinite ? (
-          <StaticRow label="Pool share" inputId="farm-share" amount="N/A" />
+          <StaticRow label="Sua proporção no fundo" inputId="farm-share" amount="N/A" />
         ) : (
           <StaticRow
-            label="Pool share"
+            label="Sua proporção no fundo"
             inputId="farm-share"
             amount={poolShare.prettify(4)}
             unit="%"
@@ -105,7 +105,7 @@ export const XbrlStblAdjusting: React.FC = () => {
         )}
 
         <StaticRow
-          label="Reward"
+          label="Recompensa"
           inputId="farm-reward-amount"
           amount={xbrlStblLiquidityMiningSTBLReward.prettify(4)}
           color={xbrlStblLiquidityMiningSTBLReward.nonZero && "success"}
@@ -117,7 +117,7 @@ export const XbrlStblAdjusting: React.FC = () => {
 
         <Flex variant="layout.actions">
           <Button variant="cancel" onClick={handleCancelPressed}>
-            Cancel
+            Cancelar
           </Button>
           <XbrlStblApprove amount={amount} />
           <XbrlStblConfirm amount={amount} />

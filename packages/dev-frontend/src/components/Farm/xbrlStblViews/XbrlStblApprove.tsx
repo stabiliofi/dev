@@ -38,7 +38,7 @@ export const XbrlStblApprove: React.FC<ApproveProps> = ({ amount }) => {
       showFailure="asTooltip"
       tooltipPlacement="bottom"
     >
-      <Button>Approve STBL/xBRL UNI LP</Button>
+      <Button>Approvar STBL/xBRL UNI LP</Button>
     </Transaction>
   );
 };

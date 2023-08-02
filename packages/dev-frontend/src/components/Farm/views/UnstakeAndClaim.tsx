@@ -29,7 +29,7 @@ export const UnstakeAndClaim: React.FC = () => {
       tooltipPlacement="bottom"
     >
       <Button variant="outline" sx={{ mt: 3, width: "100%", ml: 2 }}>
-        Unstake and claim reward
+        Desfazer stake e reivindicar recompensa
       </Button>
     </Transaction>
   );

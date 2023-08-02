@@ -22,7 +22,7 @@ export const Description: React.FC<DescriptionProps> = ({ amount }) => {
   if (!hasApproved) {
     return (
       <ActionDescription>
-        <Text>To stake your ETH/xBRL {LP} tokens you need to allow Stabilio to stake them for you</Text>
+        <Text>Para fazer stake de seus tokens {LP} ETH/xBRL, você precisa permitir que Stabilio os faça para você</Text>
       </ActionDescription>
     );
   }
@@ -36,14 +36,14 @@ export const Description: React.FC<DescriptionProps> = ({ amount }) => {
       {isWithdrawing && (
         <Transaction id={transactionId} send={stabilio.unstakeXbrlWethUniTokens.bind(stabilio, amountChanged)}>
           <Text>
-            You are unstaking {amountChanged.prettify(4)} ETH/xBRL {LP}
+            Você está retirando o stake de {amountChanged.prettify(4)} {LP} ETH/xBRL
           </Text>
         </Transaction>
       )}
       {!isWithdrawing && (
         <Transaction id={transactionId} send={stabilio.stakeXbrlWethUniTokens.bind(stabilio, amountChanged)}>
           <Text>
-            You are staking {amountChanged.prettify(4)} ETH/xBRL {LP}
+            Você está fazendo stake de {amountChanged.prettify(4)} {LP} ETH/xBRL
           </Text>
         </Transaction>
       )}

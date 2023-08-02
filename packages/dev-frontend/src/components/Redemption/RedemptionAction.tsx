@@ -29,7 +29,7 @@ export const RedemptionAction: React.FC<RedemptionActionProps> = ({
 
   return (
     <Button disabled={disabled} onClick={sendTransaction}>
-      Confirm
+      Confirmar
     </Button>
   );
 };

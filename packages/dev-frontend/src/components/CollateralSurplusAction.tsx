@@ -34,7 +34,7 @@ export const CollateralSurplusAction: React.FC = () => {
     <Flex variant="layout.actions">
       <Button disabled sx={{ mx: 2 }}>
         <Spinner sx={{ mr: 2, color: "white" }} size="20px" />
-        Waiting for your approval
+        Aguardando por sua aprovação
       </Button>
     </Flex>
   ) : myTransactionState.type !== "waitingForConfirmation" &&
@@ -44,7 +44,7 @@ export const CollateralSurplusAction: React.FC = () => {
         id={myTransactionId}
         send={stabilio.claimCollateralSurplus.bind(stabilio, undefined)}
       >
-        <Button sx={{ mx: 2 }}>Claim {collateralSurplusBalance.prettify()} ETH</Button>
+        <Button sx={{ mx: 2 }}>Reivindicar {collateralSurplusBalance.prettify()} ETH</Button>
       </Transaction>
     </Flex>
   ) : null;

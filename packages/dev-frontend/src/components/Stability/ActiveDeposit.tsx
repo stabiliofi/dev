@@ -51,7 +51,7 @@ export const ActiveDeposit: React.FC = () => {
   return (
     <Card>
       <Heading>
-        Stability Pool
+        Fundo de Estabilidade
         {!isWaitingForTransaction && (
           <Flex sx={{ justifyContent: "flex-end" }}>
             <RemainingSTBL />
@@ -61,21 +61,21 @@ export const ActiveDeposit: React.FC = () => {
       <Box sx={{ p: [2, 3] }}>
         <Box>
           <DisabledEditableRow
-            label="Deposit"
+            label="Depósito"
             inputId="deposit-xbrl"
             amount={stabilityDeposit.currentXBRL.prettify()}
             unit={COIN}
           />
 
           <StaticRow
-            label="Pool share"
+            label="Sua proporção no fundo"
             inputId="deposit-share"
             amount={poolShare.prettify(4)}
             unit="%"
           />
 
           <StaticRow
-            label="Liquidation gain"
+            label="Ganhos de liquidações"
             inputId="deposit-gain"
             amount={stabilityDeposit.collateralGain.prettify(4)}
             color={stabilityDeposit.collateralGain.nonZero && "success"}
@@ -84,7 +84,7 @@ export const ActiveDeposit: React.FC = () => {
 
           <Flex sx={{ alignItems: "center" }}>
             <StaticRow
-              label="Reward"
+              label="Recompensa"
               inputId="deposit-reward"
               amount={stabilityDeposit.stblReward.prettify()}
               color={stabilityDeposit.stblReward.nonZero && "success"}
@@ -93,9 +93,9 @@ export const ActiveDeposit: React.FC = () => {
                 <InfoIcon
                   tooltip={
                     <Card variant="tooltip" sx={{ width: "240px" }}>
-                      Although the STBL rewards accrue every minute, the value on the UI only updates
-                      when a user transacts with the Stability Pool. Therefore you may receive more
-                      rewards than is displayed when you claim or adjust your deposit.
+                      Embora as recompensas do STBL sejam acumuladas a cada minuto, o valor na interface do usuário é atualizado apenas
+                      quando um usuário faz transações com o Fundo de Estabilidade. Portanto, você pode receber mais
+                      recompensas do que é exibido quando você reivindica ou ajusta seu depósito.
                     </Card>
                   }
                 />
@@ -110,14 +110,14 @@ export const ActiveDeposit: React.FC = () => {
         <Flex variant="layout.actions">
           <Button variant="outline" onClick={handleAdjustDeposit}>
             <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+            &nbsp;Ajustar
           </Button>
 
-          <ClaimRewards disabled={!hasGain && !hasReward}>Claim ETH and STBL</ClaimRewards>
+          <ClaimRewards disabled={!hasGain && !hasReward}>Reivindicar ETH e STBL</ClaimRewards>
         </Flex>
 
         {hasTrove && (
-          <ClaimAndMove disabled={!hasGain}>Claim STBL and move ETH to Trove</ClaimAndMove>
+          <ClaimAndMove disabled={!hasGain}>Reivindicar STBL e mover ETH para o Depósito</ClaimAndMove>
         )}
       </Box>
 

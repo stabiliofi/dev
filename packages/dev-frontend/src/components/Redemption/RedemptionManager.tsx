@@ -60,15 +60,15 @@ export const RedemptionManager: React.FC = () => {
     ? [
         false,
         <ErrorDescription>
-          You can't redeem xBRL when the total collateral ratio is less than{" "}
-          <Amount>{mcrPercent}</Amount>. Please try again later.
+          Você não pode resgatar colaterais por seus xBRL quando o racional de colateral total for menor que{" "}
+          <Amount>{mcrPercent}</Amount>. Por favor, tente novamente mais tarde.
         </ErrorDescription>
       ]
     : xbrlAmount.gt(xbrlBalance)
     ? [
         false,
         <ErrorDescription>
-          The amount you're trying to redeem exceeds your balance by{" "}
+          O valor que você está tentando resgatar excede seu saldo em{" "}
           <Amount>
             {xbrlAmount.sub(xbrlBalance).prettify()} {COIN}
           </Amount>
@@ -78,7 +78,7 @@ export const RedemptionManager: React.FC = () => {
     : [
         true,
         <ActionDescription>
-          You will receive <Amount>{ethAmount.sub(ethFee).prettify(4)} ETH</Amount> in exchange for{" "}
+          Você receberá<Amount>{ethAmount.sub(ethFee).prettify(4)} ETH</Amount> em troca de{" "}
           <Amount>
             {xbrlAmount.prettify()} {COIN}
           </Amount>
@@ -89,7 +89,7 @@ export const RedemptionManager: React.FC = () => {
   return (
     <Card>
       <Heading>
-        Redeem
+        Resgatar
         {dirty && !changePending && (
           <Button
             variant="titleIcon"
@@ -103,7 +103,7 @@ export const RedemptionManager: React.FC = () => {
 
       <Box sx={{ p: [2, 3] }}>
         <EditableRow
-          label="Redeem"
+          label="Resgate de Colaterais"
           inputId="redeem-xbrl"
           amount={xbrlAmount.prettify()}
           maxAmount={xbrlBalance.toString()}
@@ -115,7 +115,7 @@ export const RedemptionManager: React.FC = () => {
         />
 
         <StaticRow
-          label="Redemption Fee"
+          label="Taxa de Resgate"
           inputId="redeem-fee"
           amount={ethFee.toString(4)}
           pendingAmount={feePct.toString(2)}
@@ -124,8 +124,8 @@ export const RedemptionManager: React.FC = () => {
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ minWidth: "240px" }}>
-                  The Redemption Fee is charged as a percentage of the redeemed Ether. The Redemption
-                  Fee depends on xBRL redemption volumes and is 0.5% at minimum.
+                  A Taxa de Resgate é cobrada como uma porcentagem do Ether resgatado.
+                  A Taxa de Resgate depende dos volumes de resgate e é de 0,5% no mínimo.
                 </Card>
               }
             />
@@ -133,7 +133,7 @@ export const RedemptionManager: React.FC = () => {
         />
 
         {((dirty || !canRedeem) && description) || (
-          <ActionDescription>Enter the amount of {COIN} you'd like to redeem.</ActionDescription>
+          <ActionDescription>Insira o valor de {COIN} que você deseja depositar para resgatar por ETH.</ActionDescription>
         )}
 
         <Flex variant="layout.actions">

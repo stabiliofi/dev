@@ -38,7 +38,7 @@ export const Approve: React.FC<ApproveProps> = ({ amount }) => {
       showFailure="asTooltip"
       tooltipPlacement="bottom"
     >
-      <Button>Approve ETH/xBRL UNI LP</Button>
+      <Button>Aprovar ETH/xBRL UNI LP</Button>
     </Transaction>
   );
 };

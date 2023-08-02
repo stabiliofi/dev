@@ -12,14 +12,14 @@ export const NoTrove: React.FC = props => {
 
   return (
     <Card>
-      <Heading>Trove</Heading>
+      <Heading>Depósito</Heading>
       <Box sx={{ p: [2, 3] }}>
-        <InfoMessage title="You haven't borrowed any xBRL yet.">
-          You can borrow xBRL by opening a Trove.
+        <InfoMessage title="Você ainda não obteve nenhum xBRL emprestado.">
+          Você pode obter xBRL emprestado abrindo um Depósito.
         </InfoMessage>
 
         <Flex variant="layout.actions">
-          <Button onClick={handleOpenTrove}>Open Trove</Button>
+          <Button onClick={handleOpenTrove}>Abrir Depósito</Button>
         </Flex>
       </Box>
     </Card>

@@ -13,11 +13,11 @@ export const DisabledRedemption: React.FC<DisabledRedemptionProps> = ({
   unlockDate
 }) => (
   <Card>
-    <Heading>Redeem</Heading>
+    <Heading>Regaste de Colaterais</Heading>
 
     <Box sx={{ p: [2, 3] }}>
       <InfoMessage
-        title="Redemption is not enabled yet."
+        title="O resgate de colaterais ainda não está habilitado."
         icon={
           <Box sx={{ color: "warning" }}>
             <Icon name="exclamation-triangle" />
@@ -25,11 +25,11 @@ export const DisabledRedemption: React.FC<DisabledRedemptionProps> = ({
         }
       >
         <Paragraph>
-          xBRL redemption is disabled for the first {disabledDays} days after launch.
+          O resgate de colaterais pelos seus xBRL está desativado nos primeiros {disabledDays} dias após o lançamento.
         </Paragraph>
 
         <Paragraph sx={{ mt: 3 }}>
-          It will be unlocked at{" "}
+          Será desbloqueado em{" "}
           <Text sx={{ fontWeight: "medium" }}>{unlockDate.toLocaleString()}</Text>.
         </Paragraph>
       </InfoMessage>

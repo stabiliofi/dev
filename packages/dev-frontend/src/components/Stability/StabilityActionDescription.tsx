@@ -21,28 +21,28 @@ export const StabilityActionDescription: React.FC<StabilityActionDescriptionProp
     <ActionDescription>
       {change.depositXBRL ? (
         <>
-          You are depositing{" "}
+          Você está depositando{" "}
           <Amount>
             {change.depositXBRL.prettify()} {COIN}
           </Amount>{" "}
-          in the Stability Pool
+          no Fundo de Estabilidade
         </>
       ) : (
         <>
-          You are withdrawing{" "}
+          Você está sacando{" "}
           <Amount>
             {change.withdrawXBRL.prettify()} {COIN}
           </Amount>{" "}
-          to your wallet
+          para sua carteira
         </>
       )}
       {(collateralGain || stblReward) && (
         <>
           {" "}
-          and claiming at least{" "}
+          e reivindicando pelo menos{" "}
           {collateralGain && stblReward ? (
             <>
-              <Amount>{collateralGain}</Amount> and <Amount>{stblReward}</Amount>
+              <Amount>{collateralGain}</Amount> e <Amount>{stblReward}</Amount>
             </>
           ) : (
             <Amount>{collateralGain ?? stblReward}</Amount>

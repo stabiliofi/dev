@@ -97,7 +97,7 @@ export const Opening: React.FC = () => {
   return (
     <Card>
       <Heading>
-        Trove
+        Depósito
         {isDirty && !isTransactionPending && (
           <Button variant="titleIcon" sx={{ ":enabled:hover": { color: "danger" } }} onClick={reset}>
             <Icon name="history" size="lg" />
@@ -107,7 +107,7 @@ export const Opening: React.FC = () => {
 
       <Box sx={{ p: [2, 3] }}>
         <EditableRow
-          label="Collateral"
+          label="Colateral"
           inputId="trove-collateral"
           amount={collateral.prettify(4)}
           maxAmount={maxCollateral.toString()}
@@ -119,7 +119,7 @@ export const Opening: React.FC = () => {
         />
 
         <EditableRow
-          label="Borrow"
+          label="Empréstimo"
           inputId="trove-borrow-amount"
           amount={borrowAmount.prettify()}
           unit={COIN}
@@ -129,7 +129,7 @@ export const Opening: React.FC = () => {
         />
 
         <StaticRow
-          label="Liquidation Reserve"
+          label="Reserva de Liquidação"
           inputId="trove-liquidation-reserve"
           amount={`${XBRL_LIQUIDATION_RESERVE}`}
           unit={COIN}
@@ -137,9 +137,9 @@ export const Opening: React.FC = () => {
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "200px" }}>
-                  An amount set aside to cover the liquidator’s gas costs if your Trove needs to be
-                  liquidated. The amount increases your debt and is refunded if you close your Trove
-                  by fully paying off its net debt.
+                  Uma quantia reservada para cobrir os custos de gás do usuário que realizar a liquidação
+                  se o seu Depósito precisar ser liquidado. O valor aumenta sua dívida e é reembolsado se 
+                  você fechar seu Depósito quitando integralmente sua dívida líquida.
                 </Card>
               }
             />
@@ -147,7 +147,7 @@ export const Opening: React.FC = () => {
         />
 
         <StaticRow
-          label="Borrowing Fee"
+          label="Taxa de Empréstimo"
           inputId="trove-borrowing-fee"
           amount={fee.prettify(2)}
           pendingAmount={feePct.toString(2)}
@@ -156,8 +156,8 @@ export const Opening: React.FC = () => {
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time fee. There are no
-                  recurring fees for borrowing, which is thus interest-free.
+                  Este montante é deduzido do montante emprestado como uma taxa única. Não há
+                  taxas recorrentes para empréstimos, que são, portanto, sem juros.
                 </Card>
               }
             />
@@ -165,7 +165,7 @@ export const Opening: React.FC = () => {
         />
 
         <StaticRow
-          label="Total debt"
+          label="Dívida total"
           inputId="trove-total-debt"
           amount={totalDebt.prettify(2)}
           unit={COIN}
@@ -173,12 +173,12 @@ export const Opening: React.FC = () => {
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "240px" }}>
-                  The total amount of xBRL your Trove will hold.{" "}
+                  O valor total de xBRL que seu Depósito irá conter.{" "}
                   {isDirty && (
                     <>
-                      You will need to repay {totalDebt.sub(XBRL_LIQUIDATION_RESERVE).prettify(2)}{" "}
-                      xBRL to reclaim your collateral ({XBRL_LIQUIDATION_RESERVE.toString()} xBRL
-                      Liquidation Reserve excluded).
+                      Você precisará pagar {totalDebt.sub(XBRL_LIQUIDATION_RESERVE).prettify(2)}{" "}
+                      xBRL para resgatar seu colateral depositado ({XBRL_LIQUIDATION_RESERVE.toString()} xBRL
+                      de Reserva de Liquidação excluídos).
                     </>
                   )}
                 </Card>
@@ -191,7 +191,7 @@ export const Opening: React.FC = () => {
 
         {description ?? (
           <ActionDescription>
-            Start by entering the amount of ETH you'd like to deposit as collateral.
+            Comece inserindo a quantidade de ETH que você gostaria de depositar como garantia de colateral.
           </ActionDescription>
         )}
 
@@ -205,7 +205,7 @@ export const Opening: React.FC = () => {
 
         <Flex variant="layout.actions">
           <Button variant="cancel" onClick={handleCancelPressed}>
-            Cancel
+            Cancelar
           </Button>
 
           {gasEstimationState.type === "inProgress" ? (
@@ -219,10 +219,10 @@ export const Opening: React.FC = () => {
               maxBorrowingRate={maxBorrowingRate}
               borrowingFeeDecayToleranceMinutes={60}
             >
-              Confirm
+              Confirmar
             </TroveAction>
           ) : (
-            <Button disabled>Confirm</Button>
+            <Button disabled>Confirmar</Button>
           )}
         </Flex>
       </Box>

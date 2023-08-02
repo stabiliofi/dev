@@ -20,11 +20,11 @@ export const ConnectionConfirmationDialog: React.FC<ConnectionConfirmationDialog
     icon={icon}
     waitReason={
       <>
-        <Text sx={{ fontWeight: "bold" }}>Waiting for connection confirmation...</Text>
-        <Text>This won’t cost you any Ether</Text>
+        <Text sx={{ fontWeight: "bold" }}>Aguardando confirmação de conexão...</Text>
+        <Text>Isso não vai te custar nenhum Ether</Text>
       </>
     }
-    cancelLabel="Cancel connection"
+    cancelLabel="Cancelar conexão"
     onCancel={onCancel}
   >
     <Box sx={{ p: [3, 4] }}>{children}</Box>

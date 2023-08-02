@@ -26,20 +26,20 @@ export const Inactive: React.FC = () => {
     <Card>
       <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
         <Heading sx={{ fontSize: 16  }}>
-          ETH/xBRL Uniswap LP
+          ETH/xBRL LP no Uniswap
         </Heading>
         <Flex sx={{ justifyContent: "flex-end" }}>
           <RemainingSTBL />
         </Flex>
       </Flex>
       <Box sx={{ p: [2, 3] }}>
-        <InfoMessage title="You aren't farming STBL.">
-          <Paragraph>You can farm STBL by staking your Uniswap ETH/xBRL LP tokens.</Paragraph>
+        <InfoMessage title="Você não está recebendo STBL.">
+          <Paragraph>Você pode receber STBL fazendo stake de seus tokens Uniswap ETH/xBRL LP.</Paragraph>
 
           <Paragraph sx={{ mt: 2 }}>
-            You can obtain LP tokens by adding liquidity to the{" "}
+          Você pode obter tokens LP adicionando liquidez ao{" "}
             <Link href={uniLink(addresses["xbrlToken"])} target="_blank">
-              ETH/xBRL pool on Uniswap. <Icon name="external-link-alt" size="xs" />
+              Fundo de liquidez ETH/xBRL no Uniswap. <Icon name="external-link-alt" size="xs" />
             </Link>
           </Paragraph>
         </InfoMessage>
@@ -48,7 +48,7 @@ export const Inactive: React.FC = () => {
           <Flex sx={{ justifyContent: "flex-start", alignItems: "center", flex: 1 }}>
             <Yield />
           </Flex>
-          <Button onClick={handleStakePressed}>Stake</Button>
+          <Button onClick={handleStakePressed}>Fazer Stake</Button>
         </Flex>
       </Box>
     </Card>

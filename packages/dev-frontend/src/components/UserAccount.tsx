@@ -22,7 +22,7 @@ export const UserAccount: React.FC = () => {
     <Box sx={{ display: ["none", "flex"] }}>
       <Flex sx={{ alignItems: "center" }}>
         <Flex sx={{ ml: 3, mr: 4, flexDirection: "column" }}>
-          <Heading sx={{ fontSize: 1 }}>Connected as</Heading>
+          <Heading sx={{ fontSize: 1 }}>Conectado como</Heading>
           <Text as="span" sx={{ fontSize: 1 }}>
             {shortenAddress(account)}
           </Text>

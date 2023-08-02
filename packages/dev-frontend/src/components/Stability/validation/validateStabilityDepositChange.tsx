@@ -44,7 +44,7 @@ export const validateStabilityDepositChange = (
     return [
       undefined,
       <ErrorDescription>
-        You can’t deposit using a wallet address that is registered as a frontend.
+        Você não pode depositar usando um endereço de carteira registrado como operador de frontend.
       </ErrorDescription>
     ];
   }
@@ -57,7 +57,7 @@ export const validateStabilityDepositChange = (
     return [
       undefined,
       <ErrorDescription>
-        The amount you're trying to deposit exceeds your balance by{" "}
+        O valor que você está tentando depositar excede seu saldo em{" "}
         <Amount>
           {change.depositXBRL.sub(xbrlBalance).prettify()} {COIN}
         </Amount>
@@ -70,8 +70,9 @@ export const validateStabilityDepositChange = (
     return [
       undefined,
       <ErrorDescription>
-        You're not allowed to withdraw xBRL from your Stability Deposit when there are
-        undercollateralized Troves. Please liquidate those Troves or try again later.
+        Você não pode sacar xBRL do seu Depósito de Estabilidade quando houver
+        Depósitos subcolateralizados (Abaixo do racional mínimo de colateral determinado). 
+        Liquide esses Depósitos ou tente novamente mais tarde.
       </ErrorDescription>
     ];
   }

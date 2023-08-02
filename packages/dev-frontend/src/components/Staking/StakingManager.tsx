@@ -79,7 +79,7 @@ const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionP
   if (originalStake.isEmpty && stakeSTBL) {
     return (
       <ActionDescription>
-        You are staking <Amount>{stakeSTBL}</Amount>.
+        Você está fazendo stake de <Amount>{stakeSTBL}</Amount>.
       </ActionDescription>
     );
   }
@@ -88,21 +88,21 @@ const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionP
     <ActionDescription>
       {stakeSTBL && (
         <>
-          You are adding <Amount>{stakeSTBL}</Amount> to your stake
+          Você está adicionando <Amount>{stakeSTBL}</Amount> ao seu stake
         </>
       )}
       {unstakeSTBL && (
         <>
-          You are withdrawing <Amount>{unstakeSTBL}</Amount> to your wallet
+          Você está sacando <Amount>{unstakeSTBL}</Amount> para sua carteira
         </>
       )}
       {(collateralGain || xbrlGain) && (
         <>
           {" "}
-          and claiming{" "}
+          e reivindicando{" "}
           {collateralGain && xbrlGain ? (
             <>
-              <Amount>{collateralGain}</Amount> and <Amount>{xbrlGain}</Amount>
+              <Amount>{collateralGain}</Amount> e <Amount>{xbrlGain}</Amount>
             </>
           ) : (
             <>
@@ -128,7 +128,7 @@ export const StakingManager: React.FC = () => {
     ? [
         undefined,
         <ErrorDescription>
-          The amount you're trying to stake exceeds your balance by{" "}
+          O valor que você está tentando fazer stake excede seu saldo em{" "}
           <Amount>
             {change.stakeSTBL.sub(stblBalance).prettify()} {GT}
           </Amount>
@@ -140,12 +140,12 @@ export const StakingManager: React.FC = () => {
   const makingNewStake = originalStake.isEmpty;
 
   return (
-    <StakingEditor title={"Staking"} {...{ originalStake, editedSTBL, dispatch }}>
+    <StakingEditor title={"Staking de STBL"} {...{ originalStake, editedSTBL, dispatch }}>
       {description ??
         (makingNewStake ? (
-          <ActionDescription>Enter the amount of {GT} you'd like to stake.</ActionDescription>
+          <ActionDescription>Insira a quantia de {GT} que você gostaria de fazer stake.</ActionDescription>
         ) : (
-          <ActionDescription>Adjust the {GT} amount to stake or withdraw.</ActionDescription>
+          <ActionDescription>Ajuste o valor de {GT} para fazer stake ou sacar.</ActionDescription>
         ))}
 
       <Flex variant="layout.actions">
@@ -153,13 +153,13 @@ export const StakingManager: React.FC = () => {
           variant="cancel"
           onClick={() => dispatchStakingViewAction({ type: "cancelAdjusting" })}
         >
-          Cancel
+          Cancelar
         </Button>
 
         {validChange ? (
-          <StakingManagerAction change={validChange}>Confirm</StakingManagerAction>
+          <StakingManagerAction change={validChange}>Confirmar</StakingManagerAction>
         ) : (
-          <Button disabled>Confirm</Button>
+          <Button disabled>Confirmar</Button>
         )}
       </Flex>
     </StakingEditor>
