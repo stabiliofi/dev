@@ -1,35 +1,35 @@
 import React from "react";
 import { Card, Heading, Link, Box, Text } from "theme-ui";
 import { AddressZero } from "@ethersproject/constants";
-import { Decimal, Percent, LiquityStoreState } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { Decimal, Percent, StabilioStoreState } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
-import { useLiquity } from "../hooks/LiquityContext";
+import { useStabilio } from "../hooks/StabilioContext";
 import { COIN, GT } from "../strings";
 import { Statistic } from "./Statistic";
 
-const selectBalances = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
+const selectBalances = ({ accountBalance, xbrlBalance, stblBalance }: StabilioStoreState) => ({
   accountBalance,
-  lusdBalance,
-  lqtyBalance
+  xbrlBalance,
+  stblBalance
 });
 
 const Balances: React.FC = () => {
-  const { accountBalance, lusdBalance, lqtyBalance } = useLiquitySelector(selectBalances);
+  const { accountBalance, xbrlBalance, stblBalance } = useStabilioSelector(selectBalances);
 
   return (
     <Box sx={{ mb: 3 }}>
       <Heading>My Account Balances</Heading>
       <Statistic name="ETH"> {accountBalance.prettify(4)}</Statistic>
-      <Statistic name={COIN}> {lusdBalance.prettify()}</Statistic>
-      <Statistic name={GT}>{lqtyBalance.prettify()}</Statistic>
+      <Statistic name={COIN}> {xbrlBalance.prettify()}</Statistic>
+      <Statistic name={GT}>{stblBalance.prettify()}</Statistic>
     </Box>
   );
 };
 
 const GitHubCommit: React.FC<{ children?: string }> = ({ children }) =>
   children?.match(/[0-9a-f]{40}/) ? (
-    <Link href={`https://github.com/liquity/dev/commit/${children}`}>{children.substr(0, 7)}</Link>
+    <Link href={`https://github.com/stabiliofi/dev/commit/${children}`}>{children.substr(0, 7)}</Link>
   ) : (
     <>unknown</>
   );
@@ -43,41 +43,41 @@ const select = ({
   numberOfTroves,
   price,
   total,
-  lusdInStabilityPool,
+  xbrlInStabilityPool,
   borrowingRate,
   redemptionRate,
-  totalStakedLQTY,
+  totalStakedSTBL,
   frontend
-}: LiquityStoreState) => ({
+}: StabilioStoreState) => ({
   numberOfTroves,
   price,
   total,
-  lusdInStabilityPool,
+  xbrlInStabilityPool,
   borrowingRate,
   redemptionRate,
-  totalStakedLQTY,
+  totalStakedSTBL,
   kickbackRate: frontend.status === "registered" ? frontend.kickbackRate : null
 });
 
 export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", showBalances }) => {
   const {
-    liquity: {
+    stabilio: {
       connection: { version: contractsVersion, deploymentDate, frontendTag }
     }
-  } = useLiquity();
+  } = useStabilio();
 
   const {
     numberOfTroves,
     price,
-    lusdInStabilityPool,
+    xbrlInStabilityPool,
     total,
     borrowingRate,
-    totalStakedLQTY,
+    totalStakedSTBL,
     kickbackRate
-  } = useLiquitySelector(select);
+  } = useStabilioSelector(select);
 
-  const lusdInStabilityPoolPct =
-    total.debt.nonZero && new Percent(lusdInStabilityPool.div(total.debt));
+  const xbrlInStabilityPoolPct =
+    total.debt.nonZero && new Percent(xbrlInStabilityPool.div(total.debt));
   const totalCollateralRatioPct = new Percent(total.collateralRatio(price));
   const borrowingFeePct = new Percent(borrowingRate);
   const kickbackRatePct = frontendTag === AddressZero ? "100" : kickbackRate?.mul(100).prettify();
@@ -86,7 +86,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
     <Card {...{ variant }}>
       {showBalances && <Balances />}
 
-      <Heading>Liquity statistics</Heading>
+      <Heading>Stabilio statistics</Heading>
 
       <Heading as="h2" sx={{ mt: 3, fontWeight: "body" }}>
         Protocol
@@ -94,7 +94,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
 
       <Statistic
         name="Borrowing Fee"
-        tooltip="The Borrowing Fee is a one-off fee charged as a percentage of the borrowed amount (in LUSD) and is part of a Trove's debt. The fee varies between 0.5% and 5% depending on LUSD redemption volumes."
+        tooltip="The Borrowing Fee is a one-off fee charged as a percentage of the borrowed amount (in xBRL) and is part of a Trove's debt. The fee varies between 0.5% and 5% depending on xBRL redemption volumes."
       >
         {borrowingFeePct.toString(2)}
       </Statistic>
@@ -111,24 +111,24 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
       <Statistic name="Troves" tooltip="The total number of active Troves in the system.">
         {Decimal.from(numberOfTroves).prettify(0)}
       </Statistic>
-      <Statistic name="LUSD supply" tooltip="The total LUSD minted by the Liquity Protocol.">
+      <Statistic name="xBRL supply" tooltip="The total xBRL minted by the Stabilio Protocol.">
         {total.debt.shorten()}
       </Statistic>
-      {lusdInStabilityPoolPct && (
+      {xbrlInStabilityPoolPct && (
         <Statistic
-          name="LUSD in Stability Pool"
-          tooltip="The total LUSD currently held in the Stability Pool, expressed as an amount and a fraction of the LUSD supply.
+          name="xBRL in Stability Pool"
+          tooltip="The total xBRL currently held in the Stability Pool, expressed as an amount and a fraction of the xBRL supply.
         "
         >
-          {lusdInStabilityPool.shorten()}
-          <Text sx={{ fontSize: 1 }}>&nbsp;({lusdInStabilityPoolPct.toString(1)})</Text>
+          {xbrlInStabilityPool.shorten()}
+          <Text sx={{ fontSize: 1 }}>&nbsp;({xbrlInStabilityPoolPct.toString(1)})</Text>
         </Statistic>
       )}
       <Statistic
-        name="Staked LQTY"
-        tooltip="The total amount of LQTY that is staked for earning fee revenue."
+        name="Staked STBL"
+        tooltip="The total amount of STBL that is staked for earning fee revenue."
       >
-        {totalStakedLQTY.shorten()}
+        {totalStakedSTBL.shorten()}
       </Statistic>
       <Statistic
         name="Total Collateral Ratio"
@@ -150,7 +150,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
       {kickbackRatePct && (
         <Statistic
           name="Kickback Rate"
-          tooltip="A rate between 0 and 100% set by the Frontend Operator that determines the fraction of LQTY that will be paid out as a kickback to the Stability Providers using the frontend."
+          tooltip="A rate between 0 and 100% set by the Frontend Operator that determines the fraction of STBL that will be paid out as a kickback to the Stability Providers using the frontend."
         >
           {kickbackRatePct}%
         </Statistic>

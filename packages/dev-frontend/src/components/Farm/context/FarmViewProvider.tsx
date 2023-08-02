@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { LiquityStoreState, Decimal } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreState, Decimal } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 import { FarmViewContext } from "./FarmViewContext";
 import { transitions } from "./transitions";
 import type { FarmView, FarmEvent } from "./transitions";
@@ -11,38 +11,38 @@ const transition = (view: FarmView, event: FarmEvent): FarmView => {
 };
 
 const getInitialView = (
-  liquidityMiningStake: Decimal,
-  remainingLiquidityMiningLQTYReward: Decimal,
-  liquidityMiningLQTYReward: Decimal
+  xbrlWethLiquidityMiningStake: Decimal,
+  remainingXbrlWethLiquidityMiningSTBLReward: Decimal,
+  xbrlWethLiquidityMiningSTBLReward: Decimal
 ): FarmView => {
-  if (remainingLiquidityMiningLQTYReward.isZero) return "DISABLED";
-  if (liquidityMiningStake.isZero && liquidityMiningLQTYReward.isZero) return "INACTIVE";
+  if (remainingXbrlWethLiquidityMiningSTBLReward.isZero) return "DISABLED";
+  if (xbrlWethLiquidityMiningStake.isZero && xbrlWethLiquidityMiningSTBLReward.isZero) return "INACTIVE";
   return "ACTIVE";
 };
 
 const selector = ({
-  liquidityMiningStake,
-  remainingLiquidityMiningLQTYReward,
-  liquidityMiningLQTYReward
-}: LiquityStoreState) => ({
-  liquidityMiningStake,
-  remainingLiquidityMiningLQTYReward,
-  liquidityMiningLQTYReward
+  xbrlWethLiquidityMiningStake,
+  remainingXbrlWethLiquidityMiningSTBLReward,
+  xbrlWethLiquidityMiningSTBLReward
+}: StabilioStoreState) => ({
+  xbrlWethLiquidityMiningStake,
+  remainingXbrlWethLiquidityMiningSTBLReward,
+  xbrlWethLiquidityMiningSTBLReward
 });
 
 export const FarmViewProvider: React.FC = props => {
   const { children } = props;
   const {
-    liquidityMiningStake,
-    remainingLiquidityMiningLQTYReward,
-    liquidityMiningLQTYReward
-  } = useLiquitySelector(selector);
+    xbrlWethLiquidityMiningStake,
+    remainingXbrlWethLiquidityMiningSTBLReward,
+    xbrlWethLiquidityMiningSTBLReward
+  } = useStabilioSelector(selector);
 
   const [view, setView] = useState<FarmView>(
     getInitialView(
-      liquidityMiningStake,
-      remainingLiquidityMiningLQTYReward,
-      liquidityMiningLQTYReward
+      xbrlWethLiquidityMiningStake,
+      remainingXbrlWethLiquidityMiningSTBLReward,
+      xbrlWethLiquidityMiningSTBLReward
     )
   );
   const viewRef = useRef<FarmView>(view);
@@ -64,12 +64,12 @@ export const FarmViewProvider: React.FC = props => {
   }, [view]);
 
   useEffect(() => {
-    if (liquidityMiningStake.isZero && liquidityMiningLQTYReward.isZero) {
+    if (xbrlWethLiquidityMiningStake.isZero && xbrlWethLiquidityMiningSTBLReward.isZero) {
       dispatchEvent("UNSTAKE_AND_CLAIM_CONFIRMED");
-    } else if (liquidityMiningStake.isZero && !liquidityMiningLQTYReward.isZero) {
+    } else if (xbrlWethLiquidityMiningStake.isZero && !xbrlWethLiquidityMiningSTBLReward.isZero) {
       dispatchEvent("UNSTAKE_CONFIRMED");
     }
-  }, [liquidityMiningStake.isZero, liquidityMiningLQTYReward.isZero, dispatchEvent]);
+  }, [xbrlWethLiquidityMiningStake.isZero, xbrlWethLiquidityMiningSTBLReward.isZero, dispatchEvent]);
 
   const provider = {
     view,

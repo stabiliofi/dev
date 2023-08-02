@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.17;
 
 import "../Dependencies/AggregatorV3Interface.sol";
 import "../Dependencies/console.sol";
 
 contract MockAggregator is AggregatorV3Interface {
-    
+
     // storage variables to hold the mock data
     uint8 private decimalsVal = 8;
     int private price;
     int private prevPrice;
-    uint private updateTime;
-    uint private prevUpdateTime;
+    uint256 private updateTime;
+    uint256 private prevUpdateTime;
 
     uint80 private latestRoundId;
     uint80 private prevRoundId;
@@ -35,11 +35,11 @@ contract MockAggregator is AggregatorV3Interface {
         prevPrice = _prevPrice;
     }
 
-    function setPrevUpdateTime(uint _prevUpdateTime) external {
+    function setPrevUpdateTime(uint256 _prevUpdateTime) external {
         prevUpdateTime = _prevUpdateTime;
     }
 
-    function setUpdateTime(uint _updateTime) external  {
+    function setUpdateTime(uint256 _updateTime) external  {
         updateTime = _updateTime;
     }
 
@@ -62,7 +62,7 @@ contract MockAggregator is AggregatorV3Interface {
       function setPrevRoundId(uint80 _prevRoundId) external {
         prevRoundId = _prevRoundId;
     }
-    
+
 
     // --- Getters that adhere to the AggregatorV3 interface ---
 
@@ -82,16 +82,16 @@ contract MockAggregator is AggregatorV3Interface {
         uint256 startedAt,
         uint256 updatedAt,
         uint80 answeredInRound
-    ) 
-    {    
+    )
+    {
         if (latestRevert) { require(1== 0, "latestRoundData reverted");}
 
-        return (latestRoundId, price, 0, updateTime, 0); 
+        return (latestRoundId, price, 0, updateTime, 0);
     }
 
     function getRoundData(uint80)
     external
-    override 
+    override
     view
     returns (
       uint80 roundId,
@@ -105,10 +105,10 @@ contract MockAggregator is AggregatorV3Interface {
         return (prevRoundId, prevPrice, 0, updateTime, 0);
     }
 
-    function description() external override view returns (string memory) {
+    function description() external override pure returns (string memory) {
         return "";
     }
-    function version() external override view returns (uint256) {
+    function version() external override pure returns (uint256) {
         return 1;
     }
 }

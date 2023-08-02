@@ -1,22 +1,22 @@
 import React, { useCallback } from "react";
 import { Card, Heading, Box, Flex, Button, Link, Paragraph } from "theme-ui";
-import { useLiquity } from "../../../../hooks/LiquityContext";
+import { useStabilio } from "../../../../hooks/StabilioContext";
 import { Icon } from "../../../Icon";
 import { InfoMessage } from "../../../InfoMessage";
 import { useFarmView } from "../../context/FarmViewContext";
-import { RemainingLQTY } from "../RemainingLQTY";
+import { RemainingSTBL } from "../RemainingSTBL";
 import { Yield } from "../Yield";
 
-const uniLink = (lusdAddress: string) => `https://app.uniswap.org/#/add/ETH/${lusdAddress}`;
+const uniLink = (xbrlAddress: string) => `https://app.uniswap.org/#/add/v2/ETH/${xbrlAddress}`;
 
 export const Inactive: React.FC = () => {
   const { dispatchEvent } = useFarmView();
 
   const {
-    liquity: {
+    stabilio: {
       connection: { addresses }
     }
-  } = useLiquity();
+  } = useStabilio();
 
   const handleStakePressed = useCallback(() => {
     dispatchEvent("STAKE_PRESSED");
@@ -24,20 +24,22 @@ export const Inactive: React.FC = () => {
 
   return (
     <Card>
-      <Heading>
-        Uniswap Liquidity Farm
+      <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
+        <Heading sx={{ fontSize: 16  }}>
+          ETH/xBRL Uniswap LP
+        </Heading>
         <Flex sx={{ justifyContent: "flex-end" }}>
-          <RemainingLQTY />
+          <RemainingSTBL />
         </Flex>
-      </Heading>
+      </Flex>
       <Box sx={{ p: [2, 3] }}>
-        <InfoMessage title="You aren't farming LQTY.">
-          <Paragraph>You can farm LQTY by staking your Uniswap ETH/LUSD LP tokens.</Paragraph>
+        <InfoMessage title="You aren't farming STBL.">
+          <Paragraph>You can farm STBL by staking your Uniswap ETH/xBRL LP tokens.</Paragraph>
 
           <Paragraph sx={{ mt: 2 }}>
             You can obtain LP tokens by adding liquidity to the{" "}
-            <Link href={uniLink(addresses["lusdToken"])} target="_blank">
-              ETH/LUSD pool on Uniswap. <Icon name="external-link-alt" size="xs" />
+            <Link href={uniLink(addresses["xbrlToken"])} target="_blank">
+              ETH/xBRL pool on Uniswap. <Icon name="external-link-alt" size="xs" />
             </Link>
           </Paragraph>
         </InfoMessage>

@@ -1,41 +1,38 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.17;
 
-import "../Dependencies/SafeMath.sol";
-import "../Dependencies/LiquityMath.sol";
+import "../Dependencies/StabilioMath.sol";
 import "../Dependencies/IERC20.sol";
 import "../Interfaces/IBorrowerOperations.sol";
 import "../Interfaces/ITroveManager.sol";
 import "../Interfaces/IStabilityPool.sol";
 import "../Interfaces/IPriceFeed.sol";
-import "../Interfaces/ILQTYStaking.sol";
+import "../Interfaces/ISTBLStaking.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ETHTransferScript.sol";
-import "./LQTYStakingScript.sol";
+import "./STBLStakingScript.sol";
 import "../Dependencies/console.sol";
 
 
-contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, LQTYStakingScript {
-    using SafeMath for uint;
+contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, STBLStakingScript {
 
     string constant public NAME = "BorrowerWrappersScript";
 
     ITroveManager immutable troveManager;
     IStabilityPool immutable stabilityPool;
     IPriceFeed immutable priceFeed;
-    IERC20 immutable lusdToken;
-    IERC20 immutable lqtyToken;
-    ILQTYStaking immutable lqtyStaking;
+    IERC20 immutable xbrlToken;
+    IERC20 immutable stblToken;
+    ISTBLStaking immutable stblStaking;
 
     constructor(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
-        address _lqtyStakingAddress
+        address _stblStakingAddress
     )
         BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress))
-        LQTYStakingScript(_lqtyStakingAddress)
-        public
+        STBLStakingScript(_stblStakingAddress)
     {
         checkContract(_troveManagerAddress);
         ITroveManager troveManagerCached = ITroveManager(_troveManagerAddress);
@@ -49,105 +46,105 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         checkContract(address(priceFeedCached));
         priceFeed = priceFeedCached;
 
-        address lusdTokenCached = address(troveManagerCached.lusdToken());
-        checkContract(lusdTokenCached);
-        lusdToken = IERC20(lusdTokenCached);
+        address xbrlTokenCached = address(troveManagerCached.xbrlToken());
+        checkContract(xbrlTokenCached);
+        xbrlToken = IERC20(xbrlTokenCached);
 
-        address lqtyTokenCached = address(troveManagerCached.lqtyToken());
-        checkContract(lqtyTokenCached);
-        lqtyToken = IERC20(lqtyTokenCached);
+        address stblTokenCached = address(troveManagerCached.stblToken());
+        checkContract(stblTokenCached);
+        stblToken = IERC20(stblTokenCached);
 
-        ILQTYStaking lqtyStakingCached = troveManagerCached.lqtyStaking();
-        require(_lqtyStakingAddress == address(lqtyStakingCached), "BorrowerWrappersScript: Wrong LQTYStaking address");
-        lqtyStaking = lqtyStakingCached;
+        ISTBLStaking stblStakingCached = troveManagerCached.stblStaking();
+        require(_stblStakingAddress == address(stblStakingCached), "BorrowerWrappersScript: Wrong STBLStaking address");
+        stblStaking = stblStakingCached;
     }
 
-    function claimCollateralAndOpenTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint) external payable {
-        uint balanceBefore = address(this).balance;
+    function claimCollateralAndOpenTrove(uint256 _maxFee, uint256 _XBRLAmount, address _upperHint, address _lowerHint) external payable {
+        uint256 balanceBefore = address(this).balance;
 
         // Claim collateral
         borrowerOperations.claimCollateral();
 
-        uint balanceAfter = address(this).balance;
+        uint256 balanceAfter = address(this).balance;
 
         // already checked in CollSurplusPool
         assert(balanceAfter > balanceBefore);
 
-        uint totalCollateral = balanceAfter.sub(balanceBefore).add(msg.value);
+        uint256 totalCollateral = balanceAfter - balanceBefore + msg.value;
 
         // Open trove with obtained collateral, plus collateral sent by user
-        borrowerOperations.openTrove{ value: totalCollateral }(_maxFee, _LUSDAmount, _upperHint, _lowerHint);
+        borrowerOperations.openTrove{ value: totalCollateral }(_maxFee, _XBRLAmount, _upperHint, _lowerHint);
     }
 
-    function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+    function claimSPRewardsAndRecycle(uint256 _maxFee, address _upperHint, address _lowerHint) external {
+        uint256 collBalanceBefore = address(this).balance;
+        uint256 stblBalanceBefore = stblToken.balanceOf(address(this));
 
         // Claim rewards
         stabilityPool.withdrawFromSP(0);
 
-        uint collBalanceAfter = address(this).balance;
-        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-        uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
+        uint256 collBalanceAfter = address(this).balance;
+        uint256 stblBalanceAfter = stblToken.balanceOf(address(this));
+        uint256 claimedCollateral = collBalanceAfter - collBalanceBefore;
 
-        // Add claimed ETH to trove, get more LUSD and stake it into the Stability Pool
+        // Add claimed ETH to trove, get more XBRL and stake it into the Stability Pool
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this));
-            uint LUSDAmount = _getNetLUSDAmount(claimedCollateral);
-            borrowerOperations.adjustTrove{ value: claimedCollateral }(_maxFee, 0, LUSDAmount, true, _upperHint, _lowerHint);
-            // Provide withdrawn LUSD to Stability Pool
-            if (LUSDAmount > 0) {
-                stabilityPool.provideToSP(LUSDAmount, address(0));
+            uint256 XBRLAmount = _getNetXBRLAmount(claimedCollateral);
+            borrowerOperations.adjustTrove{ value: claimedCollateral }(_maxFee, 0, XBRLAmount, true, _upperHint, _lowerHint);
+            // Provide withdrawn XBRL to Stability Pool
+            if (XBRLAmount > 0) {
+                stabilityPool.provideToSP(XBRLAmount, address(0));
             }
         }
 
-        // Stake claimed LQTY
-        uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-        if (claimedLQTY > 0) {
-            lqtyStaking.stake(claimedLQTY);
+        // Stake claimed STBL
+        uint256 claimedSTBL = stblBalanceAfter - stblBalanceBefore;
+        if (claimedSTBL > 0) {
+            stblStaking.stake(claimedSTBL);
         }
     }
 
-    function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
-        uint lusdBalanceBefore = lusdToken.balanceOf(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+    function claimStakingGainsAndRecycle(uint256 _maxFee, address _upperHint, address _lowerHint) external {
+        uint256 collBalanceBefore = address(this).balance;
+        uint256 xbrlBalanceBefore = xbrlToken.balanceOf(address(this));
+        uint256 stblBalanceBefore = stblToken.balanceOf(address(this));
 
         // Claim gains
-        lqtyStaking.unstake(0);
+        stblStaking.unstake(0);
 
-        uint gainedCollateral = address(this).balance.sub(collBalanceBefore); // stack too deep issues :'(
-        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
+        uint256 gainedCollateral = address(this).balance - collBalanceBefore; // stack too deep issues :'(
+        uint256 gainedXBRL = xbrlToken.balanceOf(address(this)) - xbrlBalanceBefore;
 
-        uint netLUSDAmount;
-        // Top up trove and get more LUSD, keeping ICR constant
+        uint256 netXBRLAmount;
+        // Top up trove and get more XBRL, keeping ICR constant
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
-            netLUSDAmount = _getNetLUSDAmount(gainedCollateral);
-            borrowerOperations.adjustTrove{ value: gainedCollateral }(_maxFee, 0, netLUSDAmount, true, _upperHint, _lowerHint);
+            netXBRLAmount = _getNetXBRLAmount(gainedCollateral);
+            borrowerOperations.adjustTrove{ value: gainedCollateral }(_maxFee, 0, netXBRLAmount, true, _upperHint, _lowerHint);
         }
 
-        uint totalLUSD = gainedLUSD.add(netLUSDAmount);
-        if (totalLUSD > 0) {
-            stabilityPool.provideToSP(totalLUSD, address(0));
+        uint256 totalXBRL = gainedXBRL + netXBRLAmount;
+        if (totalXBRL > 0) {
+            stabilityPool.provideToSP(totalXBRL, address(0));
 
-            // Providing to Stability Pool also triggers LQTY claim, so stake it if any
-            uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-            uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-            if (claimedLQTY > 0) {
-                lqtyStaking.stake(claimedLQTY);
+            // Providing to Stability Pool also triggers STBL claim, so stake it if any
+            uint256 stblBalanceAfter = stblToken.balanceOf(address(this));
+            uint256 claimedSTBL = stblBalanceAfter - stblBalanceBefore;
+            if (claimedSTBL > 0) {
+                stblStaking.stake(claimedSTBL);
             }
         }
 
     }
 
-    function _getNetLUSDAmount(uint _collateral) internal returns (uint) {
-        uint price = priceFeed.fetchPrice();
-        uint ICR = troveManager.getCurrentICR(address(this), price);
+    function _getNetXBRLAmount(uint256 _collateral) internal returns (uint) {
+        uint256 price = priceFeed.fetchPrice();
+        uint256 ICR = troveManager.getCurrentICR(address(this), price);
 
-        uint LUSDAmount = _collateral.mul(price).div(ICR);
-        uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(LiquityMath.DECIMAL_PRECISION.add(borrowingRate));
+        uint256 XBRLAmount = _collateral * price / ICR;
+        uint256 borrowingRate = troveManager.getBorrowingRateWithDecay();
+        uint256 netDebt = XBRLAmount * StabilioMath.DECIMAL_PRECISION / (StabilioMath.DECIMAL_PRECISION + borrowingRate);
 
         return netDebt;
     }

@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.17;
 
 import "../StabilityPool.sol";
 
 contract StabilityPoolTester is StabilityPool {
     
     function unprotectedPayable() external payable {
-        ETH = ETH.add(msg.value);
+        ETH += msg.value;
     }
 
     function setCurrentScale(uint128 _currentScale) external {
         currentScale = _currentScale;
     }
 
-    function setTotalDeposits(uint _totalLUSDDeposits) external {
-        totalLUSDDeposits = _totalLUSDDeposits;
+    function setTotalDeposits(uint256 _totalXBRLDeposits) external {
+        totalXBRLDeposits = _totalXBRLDeposits;
     }
 }

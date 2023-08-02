@@ -7,10 +7,10 @@ import {
   Decimalish,
   Decimal,
   Trove,
-  LiquityStoreState,
-  LUSD_LIQUIDATION_RESERVE
-} from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+  StabilioStoreState,
+  XBRL_LIQUIDATION_RESERVE
+} from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
 import { COIN } from "../../strings";
 
@@ -30,7 +30,7 @@ type TroveEditorProps = {
   ) => void;
 };
 
-const select = ({ price }: LiquityStoreState) => ({ price });
+const select = ({ price }: StabilioStoreState) => ({ price });
 
 export const TroveEditor: React.FC<TroveEditorProps> = ({
   children,
@@ -40,7 +40,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
   borrowingRate,
   changePending
 }) => {
-  const { price } = useLiquitySelector(select);
+  const { price } = useStabilioSelector(select);
 
   const feePct = new Percent(borrowingRate);
 
@@ -66,7 +66,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           <StaticRow
             label="Liquidation Reserve"
             inputId="trove-liquidation-reserve"
-            amount={`${LUSD_LIQUIDATION_RESERVE}`}
+            amount={`${XBRL_LIQUIDATION_RESERVE}`}
             unit={COIN}
             infoIcon={
               <InfoIcon

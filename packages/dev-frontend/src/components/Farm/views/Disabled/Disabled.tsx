@@ -1,33 +1,35 @@
 import React from "react";
 import { Card, Heading, Box, Flex } from "theme-ui";
-import { LiquityStoreState } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreState } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 import { InfoMessage } from "../../../InfoMessage";
 import { UnstakeAndClaim } from "../UnstakeAndClaim";
-import { RemainingLQTY } from "../RemainingLQTY";
+import { RemainingSTBL } from "../RemainingSTBL";
 import { StaticRow } from "../../../Trove/Editor";
 import { GT, LP } from "../../../../strings";
 
-const selector = ({ liquidityMiningStake, liquidityMiningLQTYReward }: LiquityStoreState) => ({
-  liquidityMiningStake,
-  liquidityMiningLQTYReward
+const selector = ({ xbrlWethLiquidityMiningStake, xbrlWethLiquidityMiningSTBLReward }: StabilioStoreState) => ({
+  xbrlWethLiquidityMiningStake,
+  xbrlWethLiquidityMiningSTBLReward
 });
 
 export const Disabled: React.FC = () => {
-  const { liquidityMiningStake, liquidityMiningLQTYReward } = useLiquitySelector(selector);
-  const hasStake = !liquidityMiningStake.isZero;
+  const { xbrlWethLiquidityMiningStake, xbrlWethLiquidityMiningSTBLReward } = useStabilioSelector(selector);
+  const hasStake = !xbrlWethLiquidityMiningStake.isZero;
 
   return (
     <Card>
-      <Heading>
-        Uniswap Liquidity Farm
+      <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
+        <Heading sx={{ fontSize: 16  }}>
+          ETH/xBRL Uniswap LP
+        </Heading>
         <Flex sx={{ justifyContent: "flex-end" }}>
-          <RemainingLQTY />
+          <RemainingSTBL />
         </Flex>
-      </Heading>
+      </Flex>
       <Box sx={{ p: [2, 3] }}>
         <InfoMessage title="Liquidity farming period has finished">
-          <Flex>There are no more LQTY rewards left to farm</Flex>
+          <Flex>There are no more STBL rewards left to farm</Flex>
         </InfoMessage>
         {hasStake && (
           <>
@@ -35,14 +37,14 @@ export const Disabled: React.FC = () => {
               <StaticRow
                 label="Stake"
                 inputId="farm-deposit"
-                amount={liquidityMiningStake.prettify(4)}
+                amount={xbrlWethLiquidityMiningStake.prettify(4)}
                 unit={LP}
               />
               <StaticRow
                 label="Reward"
                 inputId="farm-reward"
-                amount={liquidityMiningLQTYReward.prettify(4)}
-                color={liquidityMiningLQTYReward.nonZero && "success"}
+                amount={xbrlWethLiquidityMiningSTBLReward.prettify(4)}
+                color={xbrlWethLiquidityMiningSTBLReward.nonZero && "success"}
                 unit={GT}
               />
             </Box>

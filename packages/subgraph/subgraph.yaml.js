@@ -1,7 +1,7 @@
 const fs = require("fs");
 
-const network = process.argv[2] || "mainnet";
-const { addresses, startBlock } = require(`@liquity/lib-ethers/deployments/${network}.json`);
+const network = process.argv[2] || "goerli";
+const { addresses, startBlock } = require(`@stabilio/lib-ethers/deployments/${network}.json`);
 
 console.log(`Preparing subgraph manifest for network "${network}"`);
 
@@ -13,14 +13,14 @@ const yaml = (strings, ...keys) =>
 
 const manifest = yaml`
 specVersion: 0.0.2
-description: Liquity is a decentralized borrowing protocol offering interest-free liquidity against collateral in Ether.
-repository: https://github.com/liquity/dev/tree/main/packages/subgraph
+description: Stabilio is a decentralized borrowing protocol offering interest-free liquidity against collateral in Ether.
+repository: https://github.com/stabiliofi/dev/tree/main/packages/subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - name: TroveManager
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: TroveManager
       address: "${addresses.troveManager}"
@@ -55,7 +55,7 @@ dataSources:
           handler: handleLTermsUpdated
   - name: BorrowerOperations
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: BorrowerOperations
       address: "${addresses.borrowerOperations}"
@@ -78,11 +78,11 @@ dataSources:
       eventHandlers:
         - event: TroveUpdated(indexed address,uint256,uint256,uint256,uint8)
           handler: handleTroveUpdated
-        - event: LUSDBorrowingFeePaid(indexed address,uint256)
-          handler: handleLUSDBorrowingFeePaid
+        - event: XBRLBorrowingFeePaid(indexed address,uint256)
+          handler: handleXBRLBorrowingFeePaid
   - name: PriceFeed
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: PriceFeed
       address: "${addresses.priceFeed}"
@@ -105,7 +105,7 @@ dataSources:
           handler: handleLastGoodPriceUpdated
   - name: StabilityPool
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: StabilityPool
       address: "${addresses.stabilityPool}"
@@ -137,7 +137,7 @@ dataSources:
           handler: handleFrontendTagSet
   - name: CollSurplusPool
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: CollSurplusPool
       address: "${addresses.collSurplusPool}"
@@ -160,15 +160,15 @@ dataSources:
       eventHandlers:
         - event: CollBalanceUpdated(indexed address,uint256)
           handler: handleCollSurplusBalanceUpdated
-  - name: LQTYStaking
+  - name: STBLStaking
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
-      abi: LQTYStaking
-      address: "${addresses.lqtyStaking}"
+      abi: STBLStaking
+      address: "${addresses.stblStaking}"
       startBlock: ${startBlock}
     mapping:
-      file: ./src/mappings/LqtyStake.ts
+      file: ./src/mappings/StblStake.ts
       language: wasm/assemblyscript
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -176,24 +176,24 @@ dataSources:
         - Global
         - User
         - Transaction
-        - LqtyStake
-        - LqtyStakeChange
+        - StblStake
+        - StblStakeChange
       abis:
-        - name: LQTYStaking
-          file: ../lib-ethers/abi/LQTYStaking.json
+        - name: STBLStaking
+          file: ../lib-ethers/abi/STBLStaking.json
       eventHandlers:
         - event: StakeChanged(indexed address,uint256)
           handler: handleStakeChanged
         - event: StakingGainsWithdrawn(indexed address,uint256,uint256)
           handler: handleStakeGainsWithdrawn
 ${[
-  ["LUSDToken", addresses.lusdToken],
-  ["LQTYToken", addresses.lqtyToken]
+  ["XBRLToken", addresses.xbrlToken],
+  ["STBLToken", addresses.stblToken]
 ].map(
   ([name, address]) => yaml`
   - name: ${name}
     kind: ethereum/contract
-    network: mainnet
+    network: goerli
     source:
       abi: ERC20
       address: "${address}"

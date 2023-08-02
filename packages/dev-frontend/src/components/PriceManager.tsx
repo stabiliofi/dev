@@ -1,25 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Card, Box, Heading, Flex, Button, Label, Input } from "theme-ui";
+import { Card, Box, Heading, Flex, Label, Input } from "theme-ui";
 
-import { Decimal, LiquityStoreState } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreState } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
-import { useLiquity } from "../hooks/LiquityContext";
-
-import { Icon } from "./Icon";
-import { Transaction } from "./Transaction";
-
-const selectPrice = ({ price }: LiquityStoreState) => price;
+const selectPrice = ({ price }: StabilioStoreState) => price;
 
 export const PriceManager: React.FC = () => {
-  const {
-    liquity: {
-      send: liquity,
-      connection: { _priceFeedIsTestnet: canSetPrice }
-    }
-  } = useLiquity();
-
-  const price = useLiquitySelector(selectPrice);
+  const price = useStabilioSelector(selectPrice);
   const [editedPrice, setEditedPrice] = useState(price.toString(2));
 
   useEffect(() => {
@@ -37,13 +25,14 @@ export const PriceManager: React.FC = () => {
           <Label variant="unit">$</Label>
 
           <Input
-            type={canSetPrice ? "number" : "text"}
+            type="text"
             step="any"
             value={editedPrice}
             onChange={e => setEditedPrice(e.target.value)}
-            disabled={!canSetPrice}
+            disabled={true}
+            sx={{ borderRadius: 8 }}
           />
-
+        {/*
           {canSetPrice && (
             <Flex sx={{ ml: 2, alignItems: "center" }}>
               <Transaction
@@ -54,7 +43,7 @@ export const PriceManager: React.FC = () => {
                   if (!editedPrice) {
                     throw new Error("Invalid price");
                   }
-                  return liquity.setPrice(Decimal.from(editedPrice), overrides);
+                  return stabilio.setPrice(Decimal.from(editedPrice), overrides);
                 }}
               >
                 <Button variant="icon">
@@ -63,6 +52,7 @@ export const PriceManager: React.FC = () => {
               </Transaction>
             </Flex>
           )}
+        */}
         </Flex>
       </Box>
     </Card>

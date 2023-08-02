@@ -1,19 +1,30 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.17;
     
 interface ILockupContractFactory {
     
     // --- Events ---
 
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
-    event LockupContractDeployedThroughFactory(address _lockupContractAddress, address _beneficiary, uint _unlockTime, address _deployer);
+    event STBLTokenAddressSet(address _stblTokenAddress);
+
+    event TwoMonthsLockupContractDeployedThroughFactory(address _lockupContractAddress, address _beneficiary, uint256 _unlockTime, address _deployer);
+    event SixMonthsLockupContractDeployedThroughFactory(address _lockupContractAddress, address _beneficiary, uint256 _unlockTime, address _deployer);
+    event OneYearLockupContractDeployedThroughFactory(address _lockupContractAddress, address _beneficiary, uint256 _unlockTime, address _deployer);
 
     // --- Functions ---
 
-    function setLQTYTokenAddress(address _lqtyTokenAddress) external;
+    function setSTBLTokenAddress(address _stblTokenAddress) external;
 
-    function deployLockupContract(address _beneficiary, uint _unlockTime) external;
+    function deployTwoMonthsLockupContract(address _beneficiary, uint256 _unlockTime) external;
 
-    function isRegisteredLockup(address _addr) external view returns (bool);
+    function deploySixMonthsLockupContract(address _beneficiary, uint256 _unlockTime) external;
+
+    function deployOneYearLockupContract(address _beneficiary, uint256 _unlockTime) external;
+
+    function isRegisteredTwoMonthsLockup(address _addr) external view returns (bool);
+
+    function isRegisteredSixMonthsLockup(address _addr) external view returns (bool);
+
+    function isRegisteredOneYearLockup(address _addr) external view returns (bool);
 }

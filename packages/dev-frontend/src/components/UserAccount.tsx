@@ -1,29 +1,26 @@
 import React from "react";
 import { Text, Flex, Box, Heading } from "theme-ui";
 
-import { LiquityStoreState } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreState } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
 import { COIN, GT } from "../strings";
-import { useLiquity } from "../hooks/LiquityContext";
+import { useStabilio } from "../hooks/StabilioContext";
 import { shortenAddress } from "../utils/shortenAddress";
 
-import { Icon } from "./Icon";
-
-const select = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
+const select = ({ accountBalance, xbrlBalance, stblBalance }: StabilioStoreState) => ({
   accountBalance,
-  lusdBalance,
-  lqtyBalance
+  xbrlBalance,
+  stblBalance
 });
 
 export const UserAccount: React.FC = () => {
-  const { account } = useLiquity();
-  const { accountBalance, lusdBalance, lqtyBalance } = useLiquitySelector(select);
+  const { account } = useStabilio();
+  const { accountBalance, xbrlBalance, stblBalance } = useStabilioSelector(select);
 
   return (
     <Box sx={{ display: ["none", "flex"] }}>
       <Flex sx={{ alignItems: "center" }}>
-        <Icon name="user-circle" size="lg" />
         <Flex sx={{ ml: 3, mr: 4, flexDirection: "column" }}>
           <Heading sx={{ fontSize: 1 }}>Connected as</Heading>
           <Text as="span" sx={{ fontSize: 1 }}>
@@ -33,12 +30,10 @@ export const UserAccount: React.FC = () => {
       </Flex>
 
       <Flex sx={{ alignItems: "center" }}>
-        <Icon name="wallet" size="lg" />
-
         {([
           ["ETH", accountBalance],
-          [COIN, lusdBalance],
-          [GT, lqtyBalance]
+          [COIN, xbrlBalance],
+          [GT, stblBalance]
         ] as const).map(([currency, balance], i) => (
           <Flex key={i} sx={{ ml: 3, flexDirection: "column" }}>
             <Heading sx={{ fontSize: 1 }}>{currency}</Heading>

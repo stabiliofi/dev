@@ -2,16 +2,18 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { ContractTransaction, ContractFactory, Overrides } from "@ethersproject/contracts";
 import { Wallet } from "@ethersproject/wallet";
 
-import { Decimal } from "@liquity/lib-base";
+import { Decimal } from "@stabilio/lib-base";
 
 import {
-  _LiquityContractAddresses,
-  _LiquityContracts,
-  _LiquityDeploymentJSON,
+  _StabilioContractAddresses,
+  _StabilioContracts,
+  _StabilioDeploymentJSON,
   _connectToContracts
 } from "../src/contracts";
 
 import { createUniswapV2Pair } from "./UniswapV2Factory";
+
+type OmittedKeys = "xbrlWethUniToken" | "xbrlStblUniToken";
 
 let silent = true;
 
@@ -57,7 +59,7 @@ const deployContracts = async (
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   priceFeedIsTestnet = true,
   overrides?: Overrides
-): Promise<[addresses: Omit<_LiquityContractAddresses, "uniToken">, startBlock: number]> => {
+): Promise<[addresses: Omit<_StabilioContractAddresses, OmittedKeys>, startBlock: number]> => {
   const [activePoolAddress, startBlock] = await deployContractAndGetBlockNumber(
     deployer,
     getContractFactory,
@@ -87,7 +89,7 @@ const deployContracts = async (
       "LockupContractFactory",
       { ...overrides }
     ),
-    lqtyStaking: await deployContract(deployer, getContractFactory, "LQTYStaking", { ...overrides }),
+    stblStaking: await deployContract(deployer, getContractFactory, "STBLStaking", { ...overrides }),
     priceFeed: await deployContract(
       deployer,
       getContractFactory,
@@ -103,32 +105,36 @@ const deployContracts = async (
     gasPool: await deployContract(deployer, getContractFactory, "GasPool", {
       ...overrides
     }),
-    unipool: await deployContract(deployer, getContractFactory, "Unipool", { ...overrides })
+    xbrlWethUnipool: await deployContract(deployer, getContractFactory, "XBRLWETHUnipool", { ...overrides }),
+    xbrlStblUnipool: await deployContract(deployer, getContractFactory, "XBRLSTBLUnipool", { ...overrides }),
   };
 
   return [
     {
       ...addresses,
-      lusdToken: await deployContract(
+      xbrlToken: await deployContract(
         deployer,
         getContractFactory,
-        "LUSDToken",
+        "XBRLToken",
         addresses.troveManager,
         addresses.stabilityPool,
         addresses.borrowerOperations,
         { ...overrides }
       ),
 
-      lqtyToken: await deployContract(
+      stblToken: await deployContract(
         deployer,
         getContractFactory,
-        "LQTYToken",
+        "STBLToken",
         addresses.communityIssuance,
-        addresses.lqtyStaking,
+        addresses.stblStaking,
         addresses.lockupContractFactory,
         Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
-        addresses.unipool, // _lpRewardsAddress
-        Wallet.createRandom().address, // _multisigAddress (TODO: parameterize this)
+        addresses.xbrlWethUnipool, // xBRL : WETH _lpRewardsAddress
+        addresses.xbrlStblUnipool, // XBRL : STBL _lpRewardsAddress
+        Wallet.createRandom().address, // _momentZeroMultisigAddress (TODO: parameterize this)
+        Wallet.createRandom().address, // _sixMonthsMultisigAddress (TODO: parameterize this)
+        Wallet.createRandom().address, // _oneYearMultisigAddress (TODO: parameterize this)
         { ...overrides }
       ),
 
@@ -150,30 +156,33 @@ export const deployTellorCaller = (
   deployer: Signer,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   tellorAddress: string,
+  queryID: string,
   overrides?: Overrides
 ): Promise<string> =>
-  deployContract(deployer, getContractFactory, "TellorCaller", tellorAddress, { ...overrides });
+  deployContract(deployer, getContractFactory, "TellorCaller", tellorAddress, queryID, { ...overrides });
 
 const connectContracts = async (
   {
     activePool,
     borrowerOperations,
     troveManager,
-    lusdToken,
+    xbrlToken,
     collSurplusPool,
     communityIssuance,
     defaultPool,
-    lqtyToken,
+    stblToken,
     hintHelpers,
     lockupContractFactory,
-    lqtyStaking,
+    stblStaking,
     priceFeed,
     sortedTroves,
     stabilityPool,
     gasPool,
-    unipool,
-    uniToken
-  }: _LiquityContracts,
+    xbrlWethUnipool,
+    xbrlStblUnipool,
+    xbrlWethUniToken,
+    xbrlStblUniToken
+  }: _StabilioContracts,
   deployer: Signer,
   overrides?: Overrides
 ) => {
@@ -199,10 +208,10 @@ const connectContracts = async (
         gasPool.address,
         collSurplusPool.address,
         priceFeed.address,
-        lusdToken.address,
+        xbrlToken.address,
         sortedTroves.address,
-        lqtyToken.address,
-        lqtyStaking.address,
+        stblToken.address,
+        stblStaking.address,
         { ...overrides, nonce }
       ),
 
@@ -216,8 +225,8 @@ const connectContracts = async (
         collSurplusPool.address,
         priceFeed.address,
         sortedTroves.address,
-        lusdToken.address,
-        lqtyStaking.address,
+        xbrlToken.address,
+        stblStaking.address,
         { ...overrides, nonce }
       ),
 
@@ -226,7 +235,7 @@ const connectContracts = async (
         borrowerOperations.address,
         troveManager.address,
         activePool.address,
-        lusdToken.address,
+        xbrlToken.address,
         sortedTroves.address,
         priceFeed.address,
         communityIssuance.address,
@@ -263,9 +272,9 @@ const connectContracts = async (
       }),
 
     nonce =>
-      lqtyStaking.setAddresses(
-        lqtyToken.address,
-        lusdToken.address,
+      stblStaking.setAddresses(
+        stblToken.address,
+        xbrlToken.address,
         troveManager.address,
         borrowerOperations.address,
         activePool.address,
@@ -273,19 +282,25 @@ const connectContracts = async (
       ),
 
     nonce =>
-      lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, {
+      lockupContractFactory.setSTBLTokenAddress(stblToken.address, {
         ...overrides,
         nonce
       }),
 
     nonce =>
-      communityIssuance.setAddresses(lqtyToken.address, stabilityPool.address, {
+      communityIssuance.setAddresses(stblToken.address, stabilityPool.address, {
         ...overrides,
         nonce
       }),
 
     nonce =>
-      unipool.setParams(lqtyToken.address, uniToken.address, 2 * 30 * 24 * 60 * 60, {
+      xbrlWethUnipool.setParams(stblToken.address, xbrlWethUniToken.address, 2 * 30 * 24 * 60 * 60, {
+        ...overrides,
+        nonce
+      }),
+
+    nonce =>
+      xbrlStblUnipool.setParams(stblToken.address, xbrlStblUniToken.address, 2 * 30 * 24 * 60 * 60, {
         ...overrides,
         nonce
       })
@@ -320,7 +335,7 @@ export const deployAndSetupContracts = async (
   _isDev = true,
   wethAddress?: string,
   overrides?: Overrides
-): Promise<_LiquityDeploymentJSON> => {
+): Promise<_StabilioDeploymentJSON> => {
   if (!deployer.provider) {
     throw new Error("Signer must have a provider.");
   }
@@ -328,13 +343,14 @@ export const deployAndSetupContracts = async (
   log("Deploying contracts...");
   log();
 
-  const deployment: _LiquityDeploymentJSON = {
+  const deployment: _StabilioDeploymentJSON = {
     chainId: await deployer.getChainId(),
     version: "unknown",
     deploymentDate: new Date().getTime(),
     bootstrapPeriod: 0,
-    totalStabilityPoolLQTYReward: "0",
-    liquidityMiningLQTYRewardRate: "0",
+    totalStabilityPoolSTBLReward: "0",
+    xbrlWethLiquidityMiningSTBLRewardRate: "0",
+    xbrlStblLiquidityMiningSTBLRewardRate: "0",
     _priceFeedIsTestnet,
     _uniTokenIsMock: !wethAddress,
     _isDev,
@@ -346,9 +362,12 @@ export const deployAndSetupContracts = async (
         addresses: {
           ...addresses,
 
-          uniToken: await (wethAddress
-            ? createUniswapV2Pair(deployer, wethAddress, addresses.lusdToken, overrides)
-            : deployMockUniToken(deployer, getContractFactory, overrides))
+          xbrlWethUniToken: await (wethAddress
+            ? createUniswapV2Pair(deployer, wethAddress, addresses.xbrlToken, overrides)
+            : deployMockUniToken(deployer, getContractFactory, overrides)),
+          xbrlStblUniToken: await (wethAddress
+            ? createUniswapV2Pair(deployer, addresses.stblToken, addresses.xbrlToken, overrides)
+            : deployMockUniToken(deployer, getContractFactory, overrides)),
         }
       })
     ))
@@ -359,20 +378,24 @@ export const deployAndSetupContracts = async (
   log("Connecting contracts...");
   await connectContracts(contracts, deployer, overrides);
 
-  const lqtyTokenDeploymentTime = await contracts.lqtyToken.getDeploymentStartTime();
+  const stblTokenDeploymentTime = await contracts.stblToken.getDeploymentStartTime();
   const bootstrapPeriod = await contracts.troveManager.BOOTSTRAP_PERIOD();
-  const totalStabilityPoolLQTYReward = await contracts.communityIssuance.LQTYSupplyCap();
-  const liquidityMiningLQTYRewardRate = await contracts.unipool.rewardRate();
+  const totalStabilityPoolSTBLReward = await contracts.communityIssuance.STBLSupplyCap();
+  const xbrlWethLiquidityMiningSTBLRewardRate = await contracts.xbrlWethUnipool.rewardRate();
+  const xbrlStblLiquidityMiningSTBLRewardRate = await contracts.xbrlStblUnipool.rewardRate();
 
   return {
     ...deployment,
-    deploymentDate: lqtyTokenDeploymentTime.toNumber() * 1000,
+    deploymentDate: stblTokenDeploymentTime.toNumber() * 1000,
     bootstrapPeriod: bootstrapPeriod.toNumber(),
-    totalStabilityPoolLQTYReward: `${Decimal.fromBigNumberString(
-      totalStabilityPoolLQTYReward.toHexString()
+    totalStabilityPoolSTBLReward: `${Decimal.fromBigNumberString(
+      totalStabilityPoolSTBLReward.toHexString()
     )}`,
-    liquidityMiningLQTYRewardRate: `${Decimal.fromBigNumberString(
-      liquidityMiningLQTYRewardRate.toHexString()
+    xbrlWethLiquidityMiningSTBLRewardRate: `${Decimal.fromBigNumberString(
+      xbrlWethLiquidityMiningSTBLRewardRate.toHexString()
+    )}`,
+    xbrlStblLiquidityMiningSTBLRewardRate: `${Decimal.fromBigNumberString(
+      xbrlStblLiquidityMiningSTBLRewardRate.toHexString()
     )}`
   };
 };

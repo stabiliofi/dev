@@ -1,7 +1,7 @@
 import { Wallet } from "@ethersproject/wallet";
 
-import { Decimal, LUSD_MINIMUM_DEBT, Trove } from "@liquity/lib-base";
-import { EthersLiquity } from "@liquity/lib-ethers";
+import { Decimal, XBRL_MINIMUM_DEBT, Trove } from "@stabilio/lib-base";
+import { EthersStabilio } from "@stabilio/lib-ethers";
 
 import { deployer, funder, provider } from "../globals";
 
@@ -10,34 +10,34 @@ export interface WarzoneParams {
 }
 
 export const warzone = async ({ troves: numberOfTroves }: WarzoneParams) => {
-  const deployerLiquity = await EthersLiquity.connect(deployer);
+  const deployerStabilio = await EthersStabilio.connect(deployer);
 
-  const price = await deployerLiquity.getPrice();
+  const price = await deployerStabilio.getPrice();
 
   for (let i = 1; i <= numberOfTroves; ++i) {
     const user = Wallet.createRandom().connect(provider);
     const userAddress = await user.getAddress();
-    const debt = LUSD_MINIMUM_DEBT.add(99999 * Math.random());
+    const debt = XBRL_MINIMUM_DEBT.add(99999 * Math.random());
     const collateral = debt.mulDiv(1.11 + 3 * Math.random(), price);
 
-    const liquity = await EthersLiquity.connect(user);
+    const stabilio = await EthersStabilio.connect(user);
 
     await funder.sendTransaction({
       to: userAddress,
       value: Decimal.from(collateral).hex
     });
 
-    const fees = await liquity.getFees();
+    const fees = await stabilio.getFees();
 
-    await liquity.openTrove(
+    await stabilio.openTrove(
       Trove.recreate(new Trove(collateral, debt), fees.borrowingRate()),
       { borrowingFeeDecayToleranceMinutes: 0 },
       { gasPrice: 0 }
     );
 
     if (i % 4 === 0) {
-      const lusdBalance = await liquity.getLUSDBalance();
-      await liquity.depositLUSDInStabilityPool(lusdBalance);
+      const xbrlBalance = await stabilio.getXBRLBalance();
+      await stabilio.depositXBRLInStabilityPool(xbrlBalance);
     }
 
     if (i % 10 === 0) {

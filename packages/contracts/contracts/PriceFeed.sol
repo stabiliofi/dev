@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.17;
 
 import "./Interfaces/IPriceFeed.sol";
 import "./Interfaces/ITellorCaller.sol";
 import "./Dependencies/AggregatorV3Interface.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/BaseMath.sol";
-import "./Dependencies/LiquityMath.sol";
+import "./Dependencies/StabilioMath.sol";
 import "./Dependencies/console.sol";
 
 /*
-* PriceFeed for mainnet deployment, to be connected to Chainlink's live ETH:USD aggregator reference 
+* PriceFeed for mainnet deployment, to be connected to Chainlink's live ETH:USD and BRL:USD aggregators reference 
 * contract, and a wrapper contract TellorCaller, which connects to TellorMaster contract.
 *
 * The PriceFeed uses Chainlink as primary oracle, and Tellor as fallback. It contains logic for
@@ -21,51 +20,55 @@ import "./Dependencies/console.sol";
 * Chainlink oracle.
 */
 contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
-    using SafeMath for uint256;
-
     string constant public NAME = "PriceFeed";
 
-    AggregatorV3Interface public priceAggregator;  // Mainnet Chainlink aggregator
-    ITellorCaller public tellorCaller;  // Wrapper contract that calls the Tellor system
+    AggregatorV3Interface public brlUsdPriceAggregator;  // Mainnet Chainlink aggregator for BRL / USD price feed pair
+    AggregatorV3Interface public ethUsdPriceAggregator;  // Mainnet Chainlink aggregator for ETH / USD price feed pair
+    ITellorCaller public brlUsdTellorCaller;  // Wrapper contract that calls the Tellor system for BRL / USD  price feed pair
+    ITellorCaller public ethUsdTellorCaller;  // Wrapper contract that calls the Tellor system for BRL / USD  price feed pair
 
-    // Core Liquity contracts
-    address borrowerOperationsAddress;
-    address troveManagerAddress;
-
-    uint constant public ETHUSD_TELLOR_REQ_ID = 1;
+    uint256 public immutable tellorDigits;
 
     // Use to convert a price answer to an 18-digit precision uint
-    uint constant public TARGET_DIGITS = 18;  
-    uint constant public TELLOR_DIGITS = 6;
+    uint256 constant public TARGET_DIGITS = 18;  
 
-    // Maximum time period allowed since Chainlink's latest round data timestamp, beyond which Chainlink is considered frozen.
-    uint constant public TIMEOUT = 14400;  // 4 hours: 60 * 60 * 4
+    // Maximum time period allowed since Chainlink/Tellor's latest round data timestamp, beyond which Chainlink is considered frozen.
+    uint256 constant public TIMEOUT = 259200;  // 72 hours: 60 * 60 * 72
     
     // Maximum deviation allowed between two consecutive Chainlink oracle prices. 18-digit precision.
-    uint constant public MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND =  5e17; // 50%
+    uint256 constant public MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND =  5e17; // 50%
 
     /* 
     * The maximum relative price difference between two oracle responses allowed in order for the PriceFeed
     * to return to using the Chainlink oracle. 18-digit precision.
     */
-    uint constant public MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES = 5e16; // 5%
+    uint256 constant public MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES = 5e16; // 5%
 
-    // The last good price seen from an oracle by Liquity
-    uint public lastGoodPrice;
+    // The last good price seen from an oracle by Stabilio
+    uint256 public lastGoodPrice;
 
     struct ChainlinkResponse {
-        uint80 roundId;
-        int256 answer;
-        uint256 timestamp;
-        bool success;
-        uint8 decimals;
+        uint80 ethUsdRoundId;
+        int256 ethUsdAnswer;
+        uint256 ethUsdTimestamp;
+        bool ethUsdSuccess;
+        uint8 ethUsdDecimals;
+        uint80 brlUsdRoundId;
+        int256 brlUsdAnswer;
+        uint256 brlUsdTimestamp;
+        bool brlUsdSuccess;
+        uint8 brlUsdDecimals;
     }
 
     struct TellorResponse {
-        bool ifRetrieve;
-        uint256 value;
-        uint256 timestamp;
-        bool success;
+        bool brlUsdIfRetrieve;
+        uint256 brlUsdValue;
+        uint256 brlUsdTimestamp;
+        bool brlUsdSuccess;
+        bool ethUsdIfRetrieve;
+        uint256 ethUsdValue;
+        uint256 ethUsdTimestamp;
+        bool ethUsdSuccess;
     }
 
     enum Status {
@@ -79,57 +82,68 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // The current status of the PricFeed, which determines the conditions for the next price fetch attempt
     Status public status;
 
-    event LastGoodPriceUpdated(uint _lastGoodPrice);
     event PriceFeedStatusChanged(Status newStatus);
+
+    constructor (uint256 _tellorDigits) {
+        require(_tellorDigits > 0 && _tellorDigits <= TARGET_DIGITS, "PriceFeed: wrong decimals for Tellor");
+        tellorDigits = _tellorDigits;
+    }
 
     // --- Dependency setters ---
     
     function setAddresses(
-        address _priceAggregatorAddress,
-        address _tellorCallerAddress
+        address _brlUsdPriceAggregatorAddress,
+        address _ethUsdPriceAggregatorAddress,
+        address _brlUsdTellorCallerAddress,
+        address _ethUsdTellorCallerAddress
     )
         external
         onlyOwner
     {
-        checkContract(_priceAggregatorAddress);
-        checkContract(_tellorCallerAddress);
+        require(address(ethUsdPriceAggregator) == address(0), "PriceFeed: contacts already set");
+        require(address(brlUsdPriceAggregator) == address(0), "PriceFeed: contacts already set");
+
+        checkContract(_brlUsdPriceAggregatorAddress);
+        checkContract(_ethUsdPriceAggregatorAddress);
+        checkContract(_brlUsdTellorCallerAddress);
+        checkContract(_ethUsdTellorCallerAddress);
        
-        priceAggregator = AggregatorV3Interface(_priceAggregatorAddress);
-        tellorCaller = ITellorCaller(_tellorCallerAddress);
+        brlUsdPriceAggregator = AggregatorV3Interface(_brlUsdPriceAggregatorAddress);
+        ethUsdPriceAggregator = AggregatorV3Interface(_ethUsdPriceAggregatorAddress);
+        brlUsdTellorCaller = ITellorCaller(_brlUsdTellorCallerAddress);
+        ethUsdTellorCaller = ITellorCaller(_ethUsdTellorCallerAddress);
 
         // Explicitly set initial system status
         status = Status.chainlinkWorking;
 
         // Get an initial price from Chainlink to serve as first reference for lastGoodPrice
         ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse();
-        ChainlinkResponse memory prevChainlinkResponse = _getPrevChainlinkResponse(chainlinkResponse.roundId, chainlinkResponse.decimals);
+        ChainlinkResponse memory prevChainlinkResponse = _getPrevChainlinkResponse(chainlinkResponse.brlUsdRoundId, chainlinkResponse.brlUsdDecimals, chainlinkResponse.ethUsdRoundId, chainlinkResponse.ethUsdDecimals);
         
         require(!_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse) && !_chainlinkIsFrozen(chainlinkResponse), 
             "PriceFeed: Chainlink must be working and current");
 
         _storeChainlinkPrice(chainlinkResponse);
-
-        _renounceOwnership();
     }
 
     // --- Functions ---
 
     /*
     * fetchPrice():
-    * Returns the latest price obtained from the Oracle. Called by Liquity functions that require a current price.
+    * Returns the latest price obtained from the Oracle. Called by Stabilio functions that require a current price.
     *
     * Also callable by anyone externally.
     *
-    * Non-view function - it stores the last good price seen by Liquity.
+    * Non-view function - it stores the last good price seen by Stabilio.
     *
     * Uses a main oracle (Chainlink) and a fallback oracle (Tellor) in case Chainlink fails. If both fail, 
-    * it uses the last good price seen by Liquity.
+    * it uses the last good price seen by Stabilio.
     *
     */
     function fetchPrice() external override returns (uint) {
         // Get current and previous price data from Chainlink, and current price data from Tellor
         ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse();
-        ChainlinkResponse memory prevChainlinkResponse = _getPrevChainlinkResponse(chainlinkResponse.roundId, chainlinkResponse.decimals);
+        ChainlinkResponse memory prevChainlinkResponse = _getPrevChainlinkResponse(chainlinkResponse.brlUsdRoundId, chainlinkResponse.brlUsdDecimals, chainlinkResponse.ethUsdRoundId, chainlinkResponse.ethUsdDecimals);
         TellorResponse memory tellorResponse = _getCurrentTellorResponse();
 
         // --- CASE 1: System fetched last price from Chainlink  ---
@@ -331,6 +345,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // return Chainlink price (no status change)
             return _storeChainlinkPrice(chainlinkResponse);
         }
+        return lastGoodPrice;
     }
 
     // --- Helper functions ---
@@ -348,53 +363,62 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _badChainlinkResponse(ChainlinkResponse memory _response) internal view returns (bool) {
-         // Check for response call reverted
-        if (!_response.success) {return true;}
-        // Check for an invalid roundId that is 0
-        if (_response.roundId == 0) {return true;}
+         // Check for ETH / USD or BRL / USD responses call reverted
+        if (!_response.ethUsdSuccess || !_response.brlUsdSuccess) {return true;}
+        // Check for an invalid roundIds that is 0
+        if (_response.ethUsdRoundId == 0 || _response.brlUsdRoundId == 0) {return true;}
         // Check for an invalid timeStamp that is 0, or in the future
-        if (_response.timestamp == 0 || _response.timestamp > block.timestamp) {return true;}
-        // Check for non-positive price
-        if (_response.answer <= 0) {return true;}
+        if (_response.ethUsdTimestamp == 0 || _response.ethUsdTimestamp > block.timestamp) {return true;}
+        // Check for an invalid timeStamp that is 0, or in the future
+        if (_response.brlUsdTimestamp == 0 || _response.brlUsdTimestamp > block.timestamp) {return true;}
+        // Check for non-positive ETH / USD or BRL / USD price
+        if (_response.ethUsdAnswer <= 0 || _response.brlUsdAnswer <= 0) {return true;}
 
         return false;
     }
 
     function _chainlinkIsFrozen(ChainlinkResponse memory _response) internal view returns (bool) {
-        return block.timestamp.sub(_response.timestamp) > TIMEOUT;
+        return block.timestamp - _response.ethUsdTimestamp > TIMEOUT || block.timestamp - _response.brlUsdTimestamp > TIMEOUT ;
     }
 
     function _chainlinkPriceChangeAboveMax(ChainlinkResponse memory _currentResponse, ChainlinkResponse memory _prevResponse) internal pure returns (bool) {
-        uint currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
-        uint prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
+        uint256 currentScaledEthUsdPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.ethUsdAnswer), _currentResponse.ethUsdDecimals);
+        uint256 prevScaledEthUsdPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.ethUsdAnswer), _prevResponse.ethUsdDecimals);
+        uint256 currentScaledBrlUsdPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.brlUsdAnswer), _currentResponse.brlUsdDecimals);
+        uint256 prevScaledBrlUsdPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.brlUsdAnswer), _prevResponse.brlUsdDecimals);
 
-        uint minPrice = LiquityMath._min(currentScaledPrice, prevScaledPrice);
-        uint maxPrice = LiquityMath._max(currentScaledPrice, prevScaledPrice);
+        uint256 minEthUsdPrice = StabilioMath._min(currentScaledEthUsdPrice, prevScaledEthUsdPrice);
+        uint256 maxEthUsdPrice = StabilioMath._max(currentScaledEthUsdPrice, prevScaledEthUsdPrice);
+        uint256 minBrlUsdPrice = StabilioMath._min(currentScaledBrlUsdPrice, prevScaledBrlUsdPrice);
+        uint256 maxBrlUsdPrice = StabilioMath._max(currentScaledBrlUsdPrice, prevScaledBrlUsdPrice);
 
         /*
         * Use the larger price as the denominator:
         * - If price decreased, the percentage deviation is in relation to the the previous price.
         * - If price increased, the percentage deviation is in relation to the current price.
         */
-        uint percentDeviation = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(maxPrice);
+        uint256 ethUsdPercentDeviation = (maxEthUsdPrice - minEthUsdPrice) * DECIMAL_PRECISION / maxEthUsdPrice;
+        uint256 brlUsdPercentDeviation = (maxBrlUsdPrice - minBrlUsdPrice) * DECIMAL_PRECISION / maxBrlUsdPrice;
 
         // Return true if price has more than doubled, or more than halved.
-        return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
+        return ethUsdPercentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND || brlUsdPercentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
     }
 
     function _tellorIsBroken(TellorResponse memory _response) internal view returns (bool) {
         // Check for response call reverted
-        if (!_response.success) {return true;}
-        // Check for an invalid timeStamp that is 0, or in the future
-        if (_response.timestamp == 0 || _response.timestamp > block.timestamp) {return true;}
-        // Check for zero price
-        if (_response.value == 0) {return true;}
+        if (!_response.ethUsdSuccess || !_response.brlUsdSuccess) {return true;}
+        // Check for an invalid ETH / USD timestamp that is 0, or in the future
+        if (_response.ethUsdTimestamp == 0 || _response.ethUsdTimestamp > block.timestamp) {return true;}
+        // Check for an invalid BRL / USD timestamp that is 0, or in the future
+        if (_response.brlUsdTimestamp == 0 || _response.brlUsdTimestamp > block.timestamp) {return true;}
+        // Check for ETH  / USD and BRL / USD zero prices
+        if (_response.ethUsdValue == 0 || _response.brlUsdValue == 0) {return true;}
 
         return false;
     }
 
      function _tellorIsFrozen(TellorResponse  memory _tellorResponse) internal view returns (bool) {
-        return block.timestamp.sub(_tellorResponse.timestamp) > TIMEOUT;
+        return block.timestamp - _tellorResponse.ethUsdTimestamp > TIMEOUT || block.timestamp - _tellorResponse.brlUsdTimestamp > TIMEOUT;
     }
 
     function _bothOraclesLiveAndUnbrokenAndSimilarPrice
@@ -422,43 +446,48 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return _bothOraclesSimilarPrice(_chainlinkResponse, _tellorResponse);
     }
 
-    function _bothOraclesSimilarPrice( ChainlinkResponse memory _chainlinkResponse, TellorResponse memory _tellorResponse) internal pure returns (bool) {
-        uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
+    function _bothOraclesSimilarPrice( ChainlinkResponse memory _chainlinkResponse, TellorResponse memory _tellorResponse) internal view returns (bool) {
+        uint256 scaledChainlinkEthUsdPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.ethUsdAnswer), _chainlinkResponse.ethUsdDecimals);
+        uint256 scaledChainlinkBrlUsdPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.brlUsdAnswer), _chainlinkResponse.brlUsdDecimals);
+        uint256 scaledTellorEthUsdPrice = _scaleTellorPriceByDigits(_tellorResponse.ethUsdValue);
+        uint256 scaledTellorBrlUsdPrice = _scaleTellorPriceByDigits(_tellorResponse.brlUsdValue);
 
         // Get the relative price difference between the oracles. Use the lower price as the denominator, i.e. the reference for the calculation.
-        uint minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
-        uint maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
-        uint percentPriceDifference = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(minPrice);
+        uint256 minEthUsdPrice = StabilioMath._min(scaledTellorEthUsdPrice, scaledChainlinkEthUsdPrice);
+        uint256 maxEthUsdPrice = StabilioMath._max(scaledTellorEthUsdPrice, scaledChainlinkEthUsdPrice);
+        uint256 minBrlUsdPrice = StabilioMath._min(scaledTellorBrlUsdPrice, scaledChainlinkBrlUsdPrice);
+        uint256 maxBrlUsdPrice = StabilioMath._max(scaledTellorBrlUsdPrice, scaledChainlinkBrlUsdPrice);
+        uint256 percentEthUsdPriceDifference = (maxEthUsdPrice - minEthUsdPrice) * DECIMAL_PRECISION / minEthUsdPrice;
+        uint256 percentBrlUsdPriceDifference = (maxBrlUsdPrice - minBrlUsdPrice) * DECIMAL_PRECISION / minBrlUsdPrice;
 
         /*
         * Return true if the relative price difference is <= 3%: if so, we assume both oracles are probably reporting
         * the honest market price, as it is unlikely that both have been broken/hacked and are still in-sync.
         */
-        return percentPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES;
+        return percentEthUsdPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES && percentBrlUsdPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES;
     }
 
-    function _scaleChainlinkPriceByDigits(uint _price, uint _answerDigits) internal pure returns (uint) {
+    function _scaleChainlinkPriceByDigits(uint256 _price, uint256 _answerDigits) internal pure returns (uint) {
         /*
-        * Convert the price returned by the Chainlink oracle to an 18-digit decimal for use by Liquity.
-        * At date of Liquity launch, Chainlink uses an 8-digit price, but we also handle the possibility of
+        * Convert the price returned by the Chainlink oracle to an 18-digit decimal for use by Stabilio.
+        * At date of Stabilio launch, Chainlink uses an 8-digit price, but we also handle the possibility of
         * future changes.
         *
         */
-        uint price;
+        uint256 price;
         if (_answerDigits >= TARGET_DIGITS) {
-            // Scale the returned price value down to Liquity's target precision
-            price = _price.div(10 ** (_answerDigits - TARGET_DIGITS));
+            // Scale the returned price value down to Stabilio's target precision
+            price = _price / (10 ** (_answerDigits - TARGET_DIGITS));
         }
         else if (_answerDigits < TARGET_DIGITS) {
-            // Scale the returned price value up to Liquity's target precision
-            price = _price.mul(10 ** (TARGET_DIGITS - _answerDigits));
+            // Scale the returned price value up to Stabilio's target precision
+            price = _price * (10 ** (TARGET_DIGITS - _answerDigits));
         }
         return price;
     }
 
-    function _scaleTellorPriceByDigits(uint _price) internal pure returns (uint) {
-        return _price.mul(10**(TARGET_DIGITS - TELLOR_DIGITS));
+    function _scaleTellorPriceByDigits(uint256 _price) internal view returns (uint) {
+        return _price * (10 ** (TARGET_DIGITS - tellorDigits));
     }
 
     function _changeStatus(Status _status) internal {
@@ -466,29 +495,50 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         emit PriceFeedStatusChanged(_status);
     }
 
-    function _storePrice(uint _currentPrice) internal {
+    function _storePrice(uint256 _currentPrice) internal {
         lastGoodPrice = _currentPrice;
         emit LastGoodPriceUpdated(_currentPrice);
     }
 
      function _storeTellorPrice(TellorResponse memory _tellorResponse) internal returns (uint) {
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
-        _storePrice(scaledTellorPrice);
+        uint256 scaledTellorBrlUsdPrice = _scaleTellorPriceByDigits(_tellorResponse.brlUsdValue);
+        uint256 scaledTellorEthUsdPrice = _scaleTellorPriceByDigits(_tellorResponse.ethUsdValue);
+        uint256 calculatedEthBrlPrice = (scaledTellorEthUsdPrice * DECIMAL_PRECISION) / scaledTellorBrlUsdPrice;
+        _storePrice(calculatedEthBrlPrice);
 
-        return scaledTellorPrice;
+        return calculatedEthBrlPrice;
     }
 
     function _storeChainlinkPrice(ChainlinkResponse memory _chainlinkResponse) internal returns (uint) {
-        uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
-        _storePrice(scaledChainlinkPrice);
+        uint256 scaledChainlinkEthUsdPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.ethUsdAnswer), _chainlinkResponse.ethUsdDecimals);
+        uint256 scaledChainlinkBrlUsdPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.brlUsdAnswer), _chainlinkResponse.brlUsdDecimals);
+        uint256 calculatedEthBrlPrice = (scaledChainlinkEthUsdPrice * DECIMAL_PRECISION) / scaledChainlinkBrlUsdPrice;
+        _storePrice(calculatedEthBrlPrice);
 
-        return scaledChainlinkPrice;
+        return calculatedEthBrlPrice;
     }
 
     // --- Oracle response wrapper functions ---
 
-    function _getCurrentTellorResponse() internal view returns (TellorResponse memory tellorResponse) {
-        try tellorCaller.getTellorCurrentValue(ETHUSD_TELLOR_REQ_ID) returns
+    function _getCurrentTellorResponse() internal returns (TellorResponse memory tellorResponse) {
+        try brlUsdTellorCaller.getTellorCurrentValue() returns
+        (
+            bool ifRetrieve,
+            uint256 value,
+            uint256 timestampRetrieved
+        )
+        {
+            // If call to Tellor succeeds, return the response and success = true
+            tellorResponse.brlUsdIfRetrieve = ifRetrieve;
+            tellorResponse.brlUsdValue = value;
+            tellorResponse.brlUsdTimestamp = timestampRetrieved;
+            tellorResponse.brlUsdSuccess = true;
+        } catch {
+             // If call to Tellor reverts, return a zero response with success = false
+            return (tellorResponse);
+        }
+
+        try ethUsdTellorCaller.getTellorCurrentValue() returns
         (
             bool ifRetrieve,
             uint256 value,
@@ -496,13 +546,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         )
         {
             // If call to Tellor succeeds, return the response and success = true
-            tellorResponse.ifRetrieve = ifRetrieve;
-            tellorResponse.value = value;
-            tellorResponse.timestamp = _timestampRetrieved;
-            tellorResponse.success = true;
+            tellorResponse.ethUsdIfRetrieve = ifRetrieve;
+            tellorResponse.ethUsdValue = value;
+            tellorResponse.ethUsdTimestamp = _timestampRetrieved;
+            tellorResponse.ethUsdSuccess = true;
 
             return (tellorResponse);
-        }catch {
+        } catch {
              // If call to Tellor reverts, return a zero response with success = false
             return (tellorResponse);
         }
@@ -510,16 +560,25 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     function _getCurrentChainlinkResponse() internal view returns (ChainlinkResponse memory chainlinkResponse) {
         // First, try to get current decimal precision:
-        try priceAggregator.decimals() returns (uint8 decimals) {
+        try ethUsdPriceAggregator.decimals() returns (uint8 decimals) {
             // If call to Chainlink succeeds, record the current decimal precision
-            chainlinkResponse.decimals = decimals;
+            chainlinkResponse.ethUsdDecimals = decimals;
+        } catch {
+            // If call to Chainlink aggregator reverts, return a zero response with success = false
+            return chainlinkResponse;
+        }
+
+        // First, try to get current decimal precision:
+        try brlUsdPriceAggregator.decimals() returns (uint8 decimals) {
+            // If call to Chainlink succeeds, record the current decimal precision
+            chainlinkResponse.brlUsdDecimals = decimals;
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response with success = false
             return chainlinkResponse;
         }
 
         // Secondly, try to get latest price data:
-        try priceAggregator.latestRoundData() returns
+        try ethUsdPriceAggregator.latestRoundData() returns
         (
             uint80 roundId,
             int256 answer,
@@ -529,10 +588,30 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         )
         {
             // If call to Chainlink succeeds, return the response and success = true
-            chainlinkResponse.roundId = roundId;
-            chainlinkResponse.answer = answer;
-            chainlinkResponse.timestamp = timestamp;
-            chainlinkResponse.success = true;
+            chainlinkResponse.ethUsdRoundId = roundId;
+            chainlinkResponse.ethUsdAnswer = answer;
+            chainlinkResponse.ethUsdTimestamp = timestamp;
+            chainlinkResponse.ethUsdSuccess = true;
+        } catch {
+            // If call to Chainlink aggregator reverts, return a zero response with success = false
+            return chainlinkResponse;
+        }
+
+        // Secondly, try to get latest price data:
+        try brlUsdPriceAggregator.latestRoundData() returns
+        (
+            uint80 roundId,
+            int256 answer,
+            uint256 /* startedAt */,
+            uint256 timestamp,
+            uint80 /* answeredInRound */
+        )
+        {
+            // If call to Chainlink succeeds, return the response and success = true
+            chainlinkResponse.brlUsdRoundId = roundId;
+            chainlinkResponse.brlUsdAnswer = answer;
+            chainlinkResponse.brlUsdTimestamp = timestamp;
+            chainlinkResponse.brlUsdSuccess = true;
             return chainlinkResponse;
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response with success = false
@@ -540,14 +619,22 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         }
     }
 
-    function _getPrevChainlinkResponse(uint80 _currentRoundId, uint8 _currentDecimals) internal view returns (ChainlinkResponse memory prevChainlinkResponse) {
+    function _getPrevChainlinkResponse(
+        uint80 _brlUsdCurrentRoundId,
+        uint8 _brlUsdCurrentDecimals,
+        uint80 _ethUsdCurrentRoundId, 
+        uint8 _ethUsdCurrentDecimals
+    ) internal view returns (ChainlinkResponse memory prevChainlinkResponse) {
         /*
-        * NOTE: Chainlink only offers a current decimals() value - there is no way to obtain the decimal precision used in a 
+        * NOTE: Chainlink only offers a current decimals() value - there is no way to obtain the decimal precision used in a
         * previous round.  We assume the decimals used in the previous round are the same as the current round.
         */
+        if (_brlUsdCurrentRoundId == 0 || _ethUsdCurrentRoundId == 0) {
+      			return prevChainlinkResponse;
+    		}
 
         // Try to get the price data from the previous round:
-        try priceAggregator.getRoundData(_currentRoundId - 1) returns 
+        try brlUsdPriceAggregator.getRoundData(_brlUsdCurrentRoundId - 1) returns 
         (
             uint80 roundId,
             int256 answer,
@@ -557,16 +644,109 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         )
         {
             // If call to Chainlink succeeds, return the response and success = true
-            prevChainlinkResponse.roundId = roundId;
-            prevChainlinkResponse.answer = answer;
-            prevChainlinkResponse.timestamp = timestamp;
-            prevChainlinkResponse.decimals = _currentDecimals;
-            prevChainlinkResponse.success = true;
+            prevChainlinkResponse.brlUsdRoundId = roundId;
+            prevChainlinkResponse.brlUsdAnswer = answer;
+            prevChainlinkResponse.brlUsdTimestamp = timestamp;
+            prevChainlinkResponse.brlUsdDecimals = _brlUsdCurrentDecimals;
+            prevChainlinkResponse.brlUsdSuccess = true;
+        } catch {
+            // If call to Chainlink aggregator reverts, return a zero response with success = false
+            return prevChainlinkResponse;
+        }
+        
+        try ethUsdPriceAggregator.getRoundData(_ethUsdCurrentRoundId - 1) returns 
+        (
+            uint80 roundId,
+            int256 answer,
+            uint256 /* startedAt */,
+            uint256 timestamp,
+            uint80 /* answeredInRound */
+        )
+        {
+            // If call to Chainlink succeeds, return the response and success = true
+            prevChainlinkResponse.ethUsdRoundId = roundId;
+            prevChainlinkResponse.ethUsdAnswer = answer;
+            prevChainlinkResponse.ethUsdTimestamp = timestamp;
+            prevChainlinkResponse.ethUsdDecimals = _ethUsdCurrentDecimals;
+            prevChainlinkResponse.ethUsdSuccess = true;
             return prevChainlinkResponse;
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response with success = false
             return prevChainlinkResponse;
         }
+    }
+
+    /*
+    * forceExitBothUntrustedStatus()
+    * DAO can help one oracle return back online only if previously both were untrusted.
+    * Function reverts if both oracles are still broken.
+    * In case when both oracles are online but have different prices then caller can control 
+    * which will be checked first: ChainLink if tryTellorFirst==false, Tellor otherwise
+    */ 
+    function forceExitBothUntrustedStatus(bool tryTellorFirst) external onlyOwner {
+        require(status == Status.bothOraclesUntrusted, "PriceFeed: at least one oracle is working");
+
+        ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse();
+        ChainlinkResponse memory prevChainlinkResponse = _getPrevChainlinkResponse(chainlinkResponse.brlUsdRoundId, chainlinkResponse.brlUsdDecimals, chainlinkResponse.ethUsdRoundId, chainlinkResponse.ethUsdDecimals);
+        TellorResponse memory tellorResponse = _getCurrentTellorResponse();
+
+        // check Tellor first only if flag was true, exit function in case of success
+        if
+        (
+            tryTellorFirst &&
+            _changeStatusIfTellorLiveAndUnbroken(tellorResponse)
+        )
+        {
+            return;
+        }
+
+        // check ChainLink feed
+        if 
+        (
+            !_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse) &&
+            !_chainlinkIsFrozen(chainlinkResponse) &&
+            !_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse)
+        ) 
+        {
+            _changeStatus(Status.usingChainlinkTellorUntrusted);
+            _storeChainlinkPrice(chainlinkResponse);
+            return;
+        }
+
+        // if Tellor was already checked or check is false then revert transaction
+        if
+        (
+            !tryTellorFirst &&
+            _changeStatusIfTellorLiveAndUnbroken(tellorResponse)
+        )
+        {
+            return;
+        }
+
+        // Transaction is successful only if one oracle returned back online
+        revert("PriceFeed: both oracles are still untrusted");
+    }
+
+    function _changeStatusIfTellorLiveAndUnbroken
+    (
+        TellorResponse memory _tellorResponse
+    )
+        internal
+        returns (bool)
+    {
+        // Return true if Tellor is back online
+        if
+        (
+            !_tellorIsBroken(_tellorResponse) &&
+            !_tellorIsFrozen(_tellorResponse)
+        )
+        {
+            _changeStatus(Status.usingTellorChainlinkUntrusted);
+            _storeTellorPrice(_tellorResponse);
+            return true;
+        }
+
+        return false;
     }
 }
 

@@ -5,11 +5,11 @@ import {
   Decimal,
   Decimalish,
   StabilityDeposit,
-  LiquityStoreState,
+  StabilioStoreState,
   Difference
-} from "@liquity/lib-base";
+} from "@stabilio/lib-base";
 
-import { useLiquitySelector } from "@liquity/lib-react";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
 import { COIN, GT } from "../../strings";
 
@@ -18,41 +18,41 @@ import { EditableRow, StaticRow } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
 import { InfoIcon } from "../InfoIcon";
 
-const select = ({ lusdBalance, lusdInStabilityPool }: LiquityStoreState) => ({
-  lusdBalance,
-  lusdInStabilityPool
+const select = ({ xbrlBalance, xbrlInStabilityPool }: StabilioStoreState) => ({
+  xbrlBalance,
+  xbrlInStabilityPool
 });
 
 type StabilityDepositEditorProps = {
   originalDeposit: StabilityDeposit;
-  editedLUSD: Decimal;
+  editedXBRL: Decimal;
   changePending: boolean;
   dispatch: (action: { type: "setDeposit"; newValue: Decimalish } | { type: "revert" }) => void;
 };
 
 export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
   originalDeposit,
-  editedLUSD,
+  editedXBRL,
   changePending,
   dispatch,
   children
 }) => {
-  const { lusdBalance, lusdInStabilityPool } = useLiquitySelector(select);
+  const { xbrlBalance, xbrlInStabilityPool } = useStabilioSelector(select);
   const editingState = useState<string>();
 
-  const edited = !editedLUSD.eq(originalDeposit.currentLUSD);
+  const edited = !editedXBRL.eq(originalDeposit.currentXBRL);
 
-  const maxAmount = originalDeposit.currentLUSD.add(lusdBalance);
-  const maxedOut = editedLUSD.eq(maxAmount);
+  const maxAmount = originalDeposit.currentXBRL.add(xbrlBalance);
+  const maxedOut = editedXBRL.eq(maxAmount);
 
-  const lusdInStabilityPoolAfterChange = lusdInStabilityPool
-    .sub(originalDeposit.currentLUSD)
-    .add(editedLUSD);
+  const xbrlInStabilityPoolAfterChange = xbrlInStabilityPool
+    .sub(originalDeposit.currentXBRL)
+    .add(editedXBRL);
 
-  const originalPoolShare = originalDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool);
-  const newPoolShare = editedLUSD.mulDiv(100, lusdInStabilityPoolAfterChange);
+  const originalPoolShare = originalDeposit.currentXBRL.mulDiv(100, xbrlInStabilityPool);
+  const newPoolShare = editedXBRL.mulDiv(100, xbrlInStabilityPoolAfterChange);
   const poolShareChange =
-    originalDeposit.currentLUSD.nonZero &&
+    originalDeposit.currentXBRL.nonZero &&
     Difference.between(newPoolShare, originalPoolShare).nonZero;
 
   return (
@@ -73,13 +73,13 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
       <Box sx={{ p: [2, 3] }}>
         <EditableRow
           label="Deposit"
-          inputId="deposit-lqty"
-          amount={editedLUSD.prettify()}
+          inputId="deposit-stbl"
+          amount={editedXBRL.prettify()}
           maxAmount={maxAmount.toString()}
           maxedOut={maxedOut}
           unit={COIN}
           {...{ editingState }}
-          editedAmount={editedLUSD.toString(2)}
+          editedAmount={editedXBRL.toString(2)}
           setEditedAmount={newValue => dispatch({ type: "setDeposit", newValue })}
         />
 
@@ -109,14 +109,14 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
             <StaticRow
               label="Reward"
               inputId="deposit-reward"
-              amount={originalDeposit.lqtyReward.prettify()}
-              color={originalDeposit.lqtyReward.nonZero && "success"}
+              amount={originalDeposit.stblReward.prettify()}
+              color={originalDeposit.stblReward.nonZero && "success"}
               unit={GT}
               infoIcon={
                 <InfoIcon
                   tooltip={
                     <Card variant="tooltip" sx={{ width: "240px" }}>
-                      Although the LQTY rewards accrue every minute, the value on the UI only updates
+                      Although the STBL rewards accrue every minute, the value on the UI only updates
                       when a user transacts with the Stability Pool. Therefore you may receive more
                       rewards than is displayed when you claim or adjust your deposit.
                     </Card>

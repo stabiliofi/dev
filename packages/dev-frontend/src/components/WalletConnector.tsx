@@ -131,7 +131,6 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
             </>
           ) : (
             <>
-              <Icon name="plug" size="lg" />
               <Box sx={{ ml: 2 }}>Connect wallet</Box>
             </>
           )}
@@ -189,7 +188,7 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
               activate(connectionState.connector);
             }}
           >
-            <Text>To use Liquity, you need to connect your Ethereum account.</Text>
+            <Text>To use Stabilio, you need to connect your Ethereum account.</Text>
           </RetryDialog>
         </Modal>
       )}

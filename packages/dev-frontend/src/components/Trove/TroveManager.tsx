@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
 import { Flex, Button } from "theme-ui";
 
-import { LiquityStoreState, Decimal, Trove, Decimalish, LUSD_MINIMUM_DEBT } from "@liquity/lib-base";
+import { StabilioStoreState, Decimal, Trove, Decimalish, XBRL_MINIMUM_DEBT } from "@stabilio/lib-base";
 
-import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreUpdate, useStabilioReducer, useStabilioSelector } from "@stabilio/lib-react";
 
 import { ActionDescription } from "../ActionDescription";
 import { useMyTransactionState } from "../Transaction";
@@ -17,7 +17,7 @@ import {
   validateTroveChange
 } from "./validation/validateTroveChange";
 
-const init = ({ trove }: LiquityStoreState) => ({
+const init = ({ trove }: StabilioStoreState) => ({
   original: trove,
   edited: new Trove(trove.collateral, trove.debt),
   changePending: false,
@@ -27,7 +27,7 @@ const init = ({ trove }: LiquityStoreState) => ({
 
 type TroveManagerState = ReturnType<typeof init>;
 type TroveManagerAction =
-  | LiquityStoreUpdate
+  | StabilioStoreUpdate
   | { type: "startChange" | "finishChange" | "revert" | "addMinimumDebt" | "removeMinimumDebt" }
   | { type: "setCollateral" | "setDebt"; newValue: Decimalish };
 
@@ -84,7 +84,7 @@ const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveMana
     case "addMinimumDebt":
       return {
         ...state,
-        edited: edited.setDebt(LUSD_MINIMUM_DEBT),
+        edited: edited.setDebt(XBRL_MINIMUM_DEBT),
         addedMinimumDebt: true
       };
 
@@ -135,14 +135,14 @@ const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveMana
 const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal): Decimal => {
   const change = original.whatChanged(edited, borrowingRate);
 
-  if (change && change.type !== "invalidCreation" && change.params.borrowLUSD) {
-    return change.params.borrowLUSD.mul(borrowingRate);
+  if (change && change.type !== "invalidCreation" && change.params.borrowXBRL) {
+    return change.params.borrowXBRL.mul(borrowingRate);
   } else {
     return Decimal.ZERO;
   }
 };
 
-const select = (state: LiquityStoreState) => ({
+const select = (state: StabilioStoreState) => ({
   fees: state.fees,
   validationContext: selectForTroveChangeValidation(state)
 });
@@ -156,8 +156,8 @@ type TroveManagerProps = {
 };
 
 export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) => {
-  const [{ original, edited, changePending }, dispatch] = useLiquityReducer(reduce, init);
-  const { fees, validationContext } = useLiquitySelector(select);
+  const [{ original, edited, changePending }, dispatch] = useStabilioReducer(reduce, init);
+  const { fees, validationContext } = useStabilioSelector(select);
 
   useEffect(() => {
     if (collateral !== undefined) {

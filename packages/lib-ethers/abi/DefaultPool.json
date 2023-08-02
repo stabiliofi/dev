@@ -44,11 +44,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_LUSDDebt",
+        "name": "_XBRLDebt",
         "type": "uint256"
       }
     ],
-    "name": "DefaultPoolLUSDDebtUpdated",
+    "name": "DefaultPoolXBRLDebtUpdated",
     "type": "event"
   },
   {
@@ -81,19 +81,6 @@
       }
     ],
     "name": "EtherSent",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_newBalance",
-        "type": "uint256"
-      }
-    ],
-    "name": "LUSDBalanceUpdated",
     "type": "event"
   },
   {
@@ -142,6 +129,19 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_newBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "XBRLBalanceUpdated",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "NAME",
     "outputs": [
@@ -175,7 +175,7 @@
         "type": "uint256"
       }
     ],
-    "name": "decreaseLUSDDebt",
+    "name": "decreaseXBRLDebt",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -195,7 +195,7 @@
   },
   {
     "inputs": [],
-    "name": "getLUSDDebt",
+    "name": "getXBRLDebt",
     "outputs": [
       {
         "internalType": "uint256",
@@ -214,7 +214,7 @@
         "type": "uint256"
       }
     ],
-    "name": "increaseLUSDDebt",
+    "name": "increaseXBRLDebt",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

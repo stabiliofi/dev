@@ -1,7 +1,7 @@
 const SortedTroves = artifacts.require("./SortedTroves.sol")
 const TroveManager = artifacts.require("./TroveManager.sol")
 const PriceFeedTestnet = artifacts.require("./PriceFeedTestnet.sol")
-const LUSDToken = artifacts.require("./LUSDToken.sol")
+const XBRLToken = artifacts.require("./XBRLToken.sol")
 const ActivePool = artifacts.require("./ActivePool.sol");
 const DefaultPool = artifacts.require("./DefaultPool.sol");
 const StabilityPool = artifacts.require("./StabilityPool.sol")
@@ -11,22 +11,23 @@ const FunctionCaller = artifacts.require("./TestContracts/FunctionCaller.sol")
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol")
 
-const LQTYStaking = artifacts.require("./LQTYStaking.sol")
-const LQTYToken = artifacts.require("./LQTYToken.sol")
+const STBLStaking = artifacts.require("./STBLStaking.sol")
+const STBLToken = artifacts.require("./STBLToken.sol")
 const LockupContractFactory = artifacts.require("./LockupContractFactory.sol")
 const CommunityIssuance = artifacts.require("./CommunityIssuance.sol")
 
-const Unipool =  artifacts.require("./Unipool.sol")
+const XBRLWETHUnipool =  artifacts.require("./XBRLWETHUnipool.sol")
+const XBRLSTBLUnipool =  artifacts.require("./XBRLSTBLUnipool.sol")
 
-const LQTYTokenTester = artifacts.require("./LQTYTokenTester.sol")
+const STBLTokenTester = artifacts.require("./STBLTokenTester.sol")
 const CommunityIssuanceTester = artifacts.require("./CommunityIssuanceTester.sol")
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
 const DefaultPoolTester = artifacts.require("./DefaultPoolTester.sol")
-const LiquityMathTester = artifacts.require("./LiquityMathTester.sol")
+const StabilioMathTester = artifacts.require("./StabilioMathTester.sol")
 const BorrowerOperationsTester = artifacts.require("./BorrowerOperationsTester.sol")
 const TroveManagerTester = artifacts.require("./TroveManagerTester.sol")
-const LUSDTokenTester = artifacts.require("./LUSDTokenTester.sol")
+const XBRLTokenTester = artifacts.require("./XBRLTokenTester.sol")
 
 // Proxy scripts
 const BorrowerOperationsScript = artifacts.require('BorrowerOperationsScript')
@@ -34,7 +35,7 @@ const BorrowerWrappersScript = artifacts.require('BorrowerWrappersScript')
 const TroveManagerScript = artifacts.require('TroveManagerScript')
 const StabilityPoolScript = artifacts.require('StabilityPoolScript')
 const TokenScript = artifacts.require('TokenScript')
-const LQTYStakingScript = artifacts.require('LQTYStakingScript')
+const STBLStakingScript = artifacts.require('STBLStakingScript')
 const {
   buildUserProxies,
   BorrowerOperationsProxy,
@@ -43,16 +44,16 @@ const {
   StabilityPoolProxy,
   SortedTrovesProxy,
   TokenProxy,
-  LQTYStakingProxy
+  STBLStakingProxy
 } = require('../utils/proxyHelpers.js')
 
-/* "Liquity core" consists of all contracts in the core Liquity system.
+/* "Stabilio core" consists of all contracts in the core Stabilio system.
 
-LQTY contracts consist of only those contracts related to the LQTY Token:
+STBL contracts consist of only those contracts related to the STBL Token:
 
--the LQTY token
+-the STBL token
 -the Lockup factory and lockup contracts
--the LQTYStaking contract
+-the STBLStaking contract
 -the CommunityIssuance contract 
 */
 
@@ -61,31 +62,31 @@ const maxBytes32 = '0x' + 'f'.repeat(64)
 
 class DeploymentHelper {
 
-  static async deployLiquityCore() {
+  static async deployStabilioCore() {
     const cmdLineArgs = process.argv
     const frameworkPath = cmdLineArgs[1]
     // console.log(`Framework used:  ${frameworkPath}`)
 
     if (frameworkPath.includes("hardhat")) {
-      return this.deployLiquityCoreHardhat()
+      return this.deployStabilioCoreHardhat()
     } else if (frameworkPath.includes("truffle")) {
-      return this.deployLiquityCoreTruffle()
+      return this.deployStabilioCoreTruffle()
     }
   }
 
-  static async deployLQTYContracts(bountyAddress, lpRewardsAddress, multisigAddress) {
+  static async deploySTBLContracts(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig) {
     const cmdLineArgs = process.argv
     const frameworkPath = cmdLineArgs[1]
     // console.log(`Framework used:  ${frameworkPath}`)
 
     if (frameworkPath.includes("hardhat")) {
-      return this.deployLQTYContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress)
+      return this.deploySTBLContractsHardhat(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig)
     } else if (frameworkPath.includes("truffle")) {
-      return this.deployLQTYContractsTruffle(bountyAddress, lpRewardsAddress, multisigAddress)
+      return this.deploySTBLContractsTruffle(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig)
     }
   }
 
-  static async deployLiquityCoreHardhat() {
+  static async deployStabilioCoreHardhat() {
     const priceFeedTestnet = await PriceFeedTestnet.new()
     const sortedTroves = await SortedTroves.new()
     const troveManager = await TroveManager.new()
@@ -97,12 +98,12 @@ class DeploymentHelper {
     const functionCaller = await FunctionCaller.new()
     const borrowerOperations = await BorrowerOperations.new()
     const hintHelpers = await HintHelpers.new()
-    const lusdToken = await LUSDToken.new(
+    const xbrlToken = await XBRLToken.new(
       troveManager.address,
       stabilityPool.address,
       borrowerOperations.address
     )
-    LUSDToken.setAsDeployed(lusdToken)
+    XBRLToken.setAsDeployed(xbrlToken)
     DefaultPool.setAsDeployed(defaultPool)
     PriceFeedTestnet.setAsDeployed(priceFeedTestnet)
     SortedTroves.setAsDeployed(sortedTroves)
@@ -117,7 +118,7 @@ class DeploymentHelper {
 
     const coreContracts = {
       priceFeedTestnet,
-      lusdToken,
+      xbrlToken,
       sortedTroves,
       troveManager,
       activePool,
@@ -145,12 +146,12 @@ class DeploymentHelper {
     testerContracts.stabilityPool = await StabilityPoolTester.new()
     testerContracts.gasPool = await GasPool.new()
     testerContracts.collSurplusPool = await CollSurplusPool.new()
-    testerContracts.math = await LiquityMathTester.new()
+    testerContracts.math = await StabilioMathTester.new()
     testerContracts.borrowerOperations = await BorrowerOperationsTester.new()
     testerContracts.troveManager = await TroveManagerTester.new()
     testerContracts.functionCaller = await FunctionCaller.new()
     testerContracts.hintHelpers = await HintHelpers.new()
-    testerContracts.lusdToken =  await LUSDTokenTester.new(
+    testerContracts.xbrlToken =  await XBRLTokenTester.new(
       testerContracts.troveManager.address,
       testerContracts.stabilityPool.address,
       testerContracts.borrowerOperations.address
@@ -158,65 +159,71 @@ class DeploymentHelper {
     return testerContracts
   }
 
-  static async deployLQTYContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
-    const lqtyStaking = await LQTYStaking.new()
+  static async deploySTBLContractsHardhat(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig) {
+    const stblStaking = await STBLStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
     const communityIssuance = await CommunityIssuance.new()
 
-    LQTYStaking.setAsDeployed(lqtyStaking)
+    STBLStaking.setAsDeployed(stblStaking)
     LockupContractFactory.setAsDeployed(lockupContractFactory)
     CommunityIssuance.setAsDeployed(communityIssuance)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor 
-    const lqtyToken = await LQTYToken.new(
+    // Deploy STBL Token, passing Community Issuance and Factory addresses to the constructor 
+    const stblToken = await STBLToken.new(
       communityIssuance.address, 
-      lqtyStaking.address,
+      stblStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
-      multisigAddress
+      xbrlWethLpRewardsAddress,
+      xbrlStblLpRewardsAddress,
+      momentZeroMultisig,
+      sixMonthsMultisig,
+      oneYearMultisig
     )
-    LQTYToken.setAsDeployed(lqtyToken)
+    STBLToken.setAsDeployed(stblToken)
 
-    const LQTYContracts = {
-      lqtyStaking,
+    const STBLContracts = {
+      stblStaking,
       lockupContractFactory,
       communityIssuance,
-      lqtyToken
+      stblToken
     }
-    return LQTYContracts
+    return STBLContracts
   }
 
-  static async deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
-    const lqtyStaking = await LQTYStaking.new()
+  static async deploySTBLTesterContractsHardhat(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig) {
+    const stblStaking = await STBLStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
     const communityIssuance = await CommunityIssuanceTester.new()
 
-    LQTYStaking.setAsDeployed(lqtyStaking)
+    STBLStaking.setAsDeployed(stblStaking)
     LockupContractFactory.setAsDeployed(lockupContractFactory)
     CommunityIssuanceTester.setAsDeployed(communityIssuance)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor 
-    const lqtyToken = await LQTYTokenTester.new(
+    // Deploy STBL Token, passing Community Issuance and Factory addresses to the constructor 
+    const stblToken = await STBLTokenTester.new(
       communityIssuance.address, 
-      lqtyStaking.address,
+      stblStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
-      multisigAddress
+      xbrlWethLpRewardsAddress,
+      xbrlStblLpRewardsAddress,
+      momentZeroMultisig, 
+      sixMonthsMultisig, 
+      oneYearMultisig
     )
-    LQTYTokenTester.setAsDeployed(lqtyToken)
+    STBLTokenTester.setAsDeployed(stblToken)
 
-    const LQTYContracts = {
-      lqtyStaking,
+    const STBLContracts = {
+      stblStaking,
       lockupContractFactory,
       communityIssuance,
-      lqtyToken
+      stblToken
     }
-    return LQTYContracts
+    return STBLContracts
   }
 
-  static async deployLiquityCoreTruffle() {
+  static async deployStabilioCoreTruffle() {
     const priceFeedTestnet = await PriceFeedTestnet.new()
     const sortedTroves = await SortedTroves.new()
     const troveManager = await TroveManager.new()
@@ -228,14 +235,14 @@ class DeploymentHelper {
     const functionCaller = await FunctionCaller.new()
     const borrowerOperations = await BorrowerOperations.new()
     const hintHelpers = await HintHelpers.new()
-    const lusdToken = await LUSDToken.new(
+    const xbrlToken = await XBRLToken.new(
       troveManager.address,
       stabilityPool.address,
       borrowerOperations.address
     )
     const coreContracts = {
       priceFeedTestnet,
-      lusdToken,
+      xbrlToken,
       sortedTroves,
       troveManager,
       activePool,
@@ -250,33 +257,36 @@ class DeploymentHelper {
     return coreContracts
   }
 
-  static async deployLQTYContractsTruffle(bountyAddress, lpRewardsAddress, multisigAddress) {
-    const lqtyStaking = await lqtyStaking.new()
+  static async deploySTBLContractsTruffle(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig) {
+    const stblStaking = await stblStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
     const communityIssuance = await CommunityIssuance.new()
 
-    /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses 
+    /* Deploy STBL Token, passing Community Issuance,  STBLStaking, and Factory addresses 
     to the constructor  */
-    const lqtyToken = await LQTYToken.new(
+    const stblToken = await STBLToken.new(
       communityIssuance.address, 
-      lqtyStaking.address,
+      stblStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress, 
-      multisigAddress
+      xbrlWethLpRewardsAddress, 
+      xbrlStblLpRewardsAddress,
+      momentZeroMultisig, 
+      sixMonthsMultisig, 
+      oneYearMultisig
     )
 
-    const LQTYContracts = {
-      lqtyStaking,
+    const STBLContracts = {
+      stblStaking,
       lockupContractFactory,
       communityIssuance,
-      lqtyToken
+      stblToken
     }
-    return LQTYContracts
+    return STBLContracts
   }
 
-  static async deployLUSDToken(contracts) {
-    contracts.lusdToken = await LUSDToken.new(
+  static async deployXBRLToken(contracts) {
+    contracts.xbrlToken = await XBRLToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
@@ -284,8 +294,8 @@ class DeploymentHelper {
     return contracts
   }
 
-  static async deployLUSDTokenTester(contracts) {
-    contracts.lusdToken = await LUSDTokenTester.new(
+  static async deployXBRLTokenTester(contracts) {
+    contracts.xbrlToken = await XBRLTokenTester.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
@@ -293,13 +303,13 @@ class DeploymentHelper {
     return contracts
   }
 
-  static async deployProxyScripts(contracts, LQTYContracts, owner, users) {
+  static async deployProxyScripts(contracts, STBLContracts, owner, users) {
     const proxies = await buildUserProxies(users)
 
     const borrowerWrappersScript = await BorrowerWrappersScript.new(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
-      LQTYContracts.lqtyStaking.address
+      STBLContracts.stblStaking.address
     )
     contracts.borrowerWrappers = new BorrowerWrappersProxy(owner, proxies, borrowerWrappersScript.address)
 
@@ -314,18 +324,18 @@ class DeploymentHelper {
 
     contracts.sortedTroves = new SortedTrovesProxy(owner, proxies, contracts.sortedTroves)
 
-    const lusdTokenScript = await TokenScript.new(contracts.lusdToken.address)
-    contracts.lusdToken = new TokenProxy(owner, proxies, lusdTokenScript.address, contracts.lusdToken)
+    const xbrlTokenScript = await TokenScript.new(contracts.xbrlToken.address)
+    contracts.xbrlToken = new TokenProxy(owner, proxies, xbrlTokenScript.address, contracts.xbrlToken)
 
-    const lqtyTokenScript = await TokenScript.new(LQTYContracts.lqtyToken.address)
-    LQTYContracts.lqtyToken = new TokenProxy(owner, proxies, lqtyTokenScript.address, LQTYContracts.lqtyToken)
+    const stblTokenScript = await TokenScript.new(STBLContracts.stblToken.address)
+    STBLContracts.stblToken = new TokenProxy(owner, proxies, stblTokenScript.address, STBLContracts.stblToken)
 
-    const lqtyStakingScript = await LQTYStakingScript.new(LQTYContracts.lqtyStaking.address)
-    LQTYContracts.lqtyStaking = new LQTYStakingProxy(owner, proxies, lqtyStakingScript.address, LQTYContracts.lqtyStaking)
+    const stblStakingScript = await STBLStakingScript.new(STBLContracts.stblStaking.address)
+    STBLContracts.stblStaking = new STBLStakingProxy(owner, proxies, stblStakingScript.address, STBLContracts.stblStaking)
   }
 
   // Connect contracts to their dependencies
-  static async connectCoreContracts(contracts, LQTYContracts) {
+  static async connectCoreContracts(contracts, STBLContracts) {
 
     // set TroveManager addr in SortedTroves
     await contracts.sortedTroves.setParams(
@@ -347,10 +357,10 @@ class DeploymentHelper {
       contracts.gasPool.address,
       contracts.collSurplusPool.address,
       contracts.priceFeedTestnet.address,
-      contracts.lusdToken.address,
+      contracts.xbrlToken.address,
       contracts.sortedTroves.address,
-      LQTYContracts.lqtyToken.address,
-      LQTYContracts.lqtyStaking.address
+      STBLContracts.stblToken.address,
+      STBLContracts.stblStaking.address
     )
 
     // set contracts in BorrowerOperations 
@@ -363,8 +373,8 @@ class DeploymentHelper {
       contracts.collSurplusPool.address,
       contracts.priceFeedTestnet.address,
       contracts.sortedTroves.address,
-      contracts.lusdToken.address,
-      LQTYContracts.lqtyStaking.address
+      contracts.xbrlToken.address,
+      STBLContracts.stblStaking.address
     )
 
     // set contracts in the Pools
@@ -372,10 +382,10 @@ class DeploymentHelper {
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
       contracts.activePool.address,
-      contracts.lusdToken.address,
+      contracts.xbrlToken.address,
       contracts.sortedTroves.address,
       contracts.priceFeedTestnet.address,
-      LQTYContracts.communityIssuance.address
+      STBLContracts.communityIssuance.address
     )
 
     await contracts.activePool.setAddresses(
@@ -403,28 +413,28 @@ class DeploymentHelper {
     )
   }
 
-  static async connectLQTYContracts(LQTYContracts) {
-    // Set LQTYToken address in LCF
-    await LQTYContracts.lockupContractFactory.setLQTYTokenAddress(LQTYContracts.lqtyToken.address)
+  static async connectSTBLContracts(STBLContracts) {
+    // Set STBLToken address in LCF
+    await STBLContracts.lockupContractFactory.setSTBLTokenAddress(STBLContracts.stblToken.address)
   }
 
-  static async connectLQTYContractsToCore(LQTYContracts, coreContracts) {
-    await LQTYContracts.lqtyStaking.setAddresses(
-      LQTYContracts.lqtyToken.address,
-      coreContracts.lusdToken.address,
+  static async connectSTBLContractsToCore(STBLContracts, coreContracts) {
+    await STBLContracts.stblStaking.setAddresses(
+      STBLContracts.stblToken.address,
+      coreContracts.xbrlToken.address,
       coreContracts.troveManager.address, 
       coreContracts.borrowerOperations.address,
       coreContracts.activePool.address
     )
   
-    await LQTYContracts.communityIssuance.setAddresses(
-      LQTYContracts.lqtyToken.address,
+    await STBLContracts.communityIssuance.setAddresses(
+      STBLContracts.stblToken.address,
       coreContracts.stabilityPool.address
     )
   }
 
-  static async connectUnipool(uniPool, LQTYContracts, uniswapPairAddr, duration) {
-    await uniPool.setParams(LQTYContracts.lqtyToken.address, uniswapPairAddr, duration)
+  static async connectUnipool(uniPool, STBLContracts, uniswapPairAddr, duration) {
+    await uniPool.setParams(STBLContracts.stblToken.address, uniswapPairAddr, duration)
   }
 }
 module.exports = DeploymentHelper

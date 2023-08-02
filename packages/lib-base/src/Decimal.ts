@@ -27,7 +27,7 @@ export type Decimalish = Decimal | number | string;
  * Fixed-point decimal bignumber with 18 digits of precision.
  *
  * @remarks
- * Used by Liquity libraries to precisely represent native currency (e.g. Ether), LUSD and LQTY
+ * Used by Stabilio libraries to precisely represent native currency (e.g. Ether), XBRL and STBL
  * amounts, as well as derived metrics like collateral ratios.
  *
  * @public
@@ -60,6 +60,10 @@ export class Decimal {
 
   static fromBigNumberString(bigNumberString: string): Decimal {
     return new Decimal(BigNumber.from(bigNumberString));
+  }
+
+  static fromBigNumber(bigNumber: BigNumber): Decimal {
+    return new Decimal(bigNumber);
   }
 
   private static _fromString(representation: string): Decimal {
@@ -375,6 +379,14 @@ export class Difference {
     }
 
     return this._number.sign + this._number.absoluteValue.prettify(precision);
+  }
+
+  nonZeroish(precision: number): this | undefined {
+    const zeroish = `0.${"0".repeat(precision)}5`;
+
+    if (this._number?.absoluteValue.gte(zeroish)) {
+      return this;
+    }
   }
 
   mul(multiplier: Decimalish): Difference {

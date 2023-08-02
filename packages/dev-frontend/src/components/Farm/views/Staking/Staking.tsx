@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Heading, Box, Flex, Card, Button } from "theme-ui";
-import { Decimal, LiquityStoreState } from "@liquity/lib-base";
+import { Decimal, StabilioStoreState } from "@stabilio/lib-base";
 import { LP } from "../../../../strings";
 import { Icon } from "../../../Icon";
 import { EditableRow, StaticRow } from "../../../Trove/Editor";
@@ -12,14 +12,14 @@ import { Description } from "../Description";
 import { Approve } from "../Approve";
 import { Validation } from "../Validation";
 import { useValidationState } from "../../context/useValidationState";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { useStabilioSelector } from "@stabilio/lib-react";
 
 const transactionId = /farm-/;
-const selector = ({ totalStakedUniTokens }: LiquityStoreState) => ({ totalStakedUniTokens });
+const selector = ({ totalStakedXbrlWethUniTokens }: StabilioStoreState) => ({ totalStakedXbrlWethUniTokens });
 
 export const Staking: React.FC = () => {
   const { dispatchEvent } = useFarmView();
-  const { totalStakedUniTokens } = useLiquitySelector(selector);
+  const { totalStakedXbrlWethUniTokens } = useStabilioSelector(selector);
 
   const [amount, setAmount] = useState<Decimal>(Decimal.from(0));
   const editingState = useState<string>();
@@ -36,14 +36,16 @@ export const Staking: React.FC = () => {
     dispatchEvent("CANCEL_PRESSED");
   }, [dispatchEvent]);
 
-  const nextTotalStakedUniTokens = totalStakedUniTokens.add(amount);
+  const nextTotalStakedUniTokens = totalStakedXbrlWethUniTokens.add(amount);
 
   const poolShare = amount.mulDiv(100, nextTotalStakedUniTokens);
 
   return (
     <Card>
-      <Heading>
-        Uniswap Liquidity Farm
+      <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
+        <Heading sx={{ fontSize: 16  }}>
+          ETH/xBRL Uniswap LP
+        </Heading>
         {isDirty && !isTransactionPending && (
           <Button
             variant="titleIcon"
@@ -53,7 +55,7 @@ export const Staking: React.FC = () => {
             <Icon name="history" size="lg" />
           </Button>
         )}
-      </Heading>
+      </Flex>
 
       <Box sx={{ p: [2, 3] }}>
         <EditableRow

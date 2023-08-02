@@ -2,16 +2,18 @@ import { Theme, ThemeUIStyleObject } from "theme-ui";
 
 const baseColors = {
   blue: "#1542cd",
-  purple: "#745ddf",
+  purple: "#A350FD",
   cyan: "#2eb6ea",
   green: "#28c081",
   yellow: "#fd9d28",
   red: "#dc2c10",
-  lightRed: "#ff755f"
+  lightRed: "#ff755f",
+  gradient: "linear-gradient(90deg,#dc77f7,#7a29d2 50%,#220a40)"
 };
 
 const colors = {
-  primary: baseColors.blue,
+  primary: baseColors.purple,
+  gradient: baseColors.gradient,
   secondary: baseColors.purple,
   accent: baseColors.cyan,
 
@@ -22,15 +24,17 @@ const colors = {
   info: baseColors.blue,
   invalid: "pink",
 
-  text: "#293147",
-  background: "white",
-  muted: "#eaebed"
+  text: "white",
+  background: "black",
+  muted: "#26262b"
 };
 
 const buttonBase: ThemeUIStyleObject = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  borderRadius: 10,
+  fontSize: 14,
 
   ":enabled": { cursor: "pointer" }
 };
@@ -42,7 +46,6 @@ const button: ThemeUIStyleObject = {
   py: "12px",
 
   color: "white",
-  border: 1,
 
   fontWeight: "bold",
 
@@ -52,14 +55,15 @@ const button: ThemeUIStyleObject = {
 };
 
 const buttonOutline = (color: string, hoverColor: string): ThemeUIStyleObject => ({
-  color,
-  borderColor: color,
+  color: "white",
+  borderColor: "white",
   background: "none",
+  border: 1,
 
   ":enabled:hover": {
     color: "background",
-    bg: hoverColor,
-    borderColor: hoverColor
+    bg: "white",
+    borderColor: "white"
   }
 });
 
@@ -78,7 +82,7 @@ const iconButton: ThemeUIStyleObject = {
   }
 };
 
-const cardHeadingFontSize = 18.7167;
+const cardHeadingFontSize = 16;
 
 const cardGapX = [0, 3, 4];
 const cardGapY = [3, 3, 4];
@@ -86,20 +90,20 @@ const cardGapY = [3, 3, 4];
 const card: ThemeUIStyleObject = {
   position: "relative",
   mt: cardGapY,
-  border: 1,
   boxShadow: [1, null, 2]
 };
 
 const infoCard: ThemeUIStyleObject = {
   ...card,
 
-  padding: 3,
+  padding: 4,
 
-  borderColor: "rgba(122,199,240,0.4)",
-  background: "linear-gradient(200deg, #d4d9fc, #cae9f9)",
+  background: "linear-gradient(200deg, #000000, #230037)",
+  borderRadius: 12,
+  border: 1,
+  borderColor: "secondary",
 
   h2: {
-    mb: 2,
     fontSize: cardHeadingFontSize
   }
 };
@@ -109,7 +113,7 @@ const formBase: ThemeUIStyleObject = {
   width: "auto",
   flexShrink: 0,
   padding: 2,
-  fontSize: 3
+  fontSize: 2
 };
 
 const formCell: ThemeUIStyleObject = {
@@ -128,7 +132,8 @@ const overlay: ThemeUIStyleObject = {
   left: 0,
   top: 0,
   width: "100%",
-  height: "100%"
+  height: "100%",
+  borderRadius: 12
 };
 
 const modalOverlay: ThemeUIStyleObject = {
@@ -163,7 +168,7 @@ const theme: Theme = {
     monospace: "Menlo, monospace"
   },
 
-  fontSizes: [12, 14, 16, 20, 24, 32, 48, 64, 96],
+  fontSizes: [11, 12, 14, 16, 20, 28, 48, 64, 96],
 
   fontWeights: {
     body: 400,
@@ -196,12 +201,12 @@ const theme: Theme = {
     primary: {
       ...button,
 
-      bg: "primary",
-      borderColor: "primary",
+      background: "linear-gradient(90deg,#dc77f7,#7a29d2 50%,#220a40)",
+      transition: "all 0.3s",
 
       ":enabled:hover": {
-        bg: "secondary",
-        borderColor: "secondary"
+        background: "white",
+        color: "black",
       }
     },
 
@@ -252,10 +257,14 @@ const theme: Theme = {
     primary: {
       ...card,
 
-      padding: 0,
+      pl: 3,
+      pt: 2,
+      pb: 3,
+      pr: 3,
 
       borderColor: "muted",
-      bg: "background",
+      bg: "muted",
+      borderRadius: 12,
 
       "> h2": {
         display: "flex",
@@ -263,13 +272,11 @@ const theme: Theme = {
         alignItems: "center",
 
         height: "56px",
-
         pl: 3,
-        py: 2,
-        pr: 2,
+        pr: 3,
 
         bg: "muted",
-
+        borderRadius: 12,
         fontSize: cardHeadingFontSize
       }
     },
@@ -336,7 +343,7 @@ const theme: Theme = {
       alignItems: "stretch",
 
       position: ["fixed", "relative"],
-      width: "100vw",
+      width: "100%",
       top: 0,
       zIndex: 1,
 
@@ -384,18 +391,26 @@ const theme: Theme = {
     },
 
     actions: {
-      justifyContent: "flex-end",
-      mt: 2,
+      justifyContent: "flex-center",
+      flexDirection: "column",
+      width: "100%",
 
       button: {
-        ml: 2
+        ml: 2,
+        mt: 3,
+        transition: "all 0.3s",
+
+        ":enabled:hover": {
+          background: "white",
+          color: "black",
+        },
       }
     },
 
     disabledOverlay: {
       ...overlay,
 
-      bg: "rgba(255, 255, 255, 0.5)"
+      bg: "rgba(255, 255, 255, 0.15)"
     },
 
     modalOverlay: {
@@ -477,10 +492,8 @@ const theme: Theme = {
     nav: {
       px: 2,
       py: 1,
-      fontWeight: "medium",
       fontSize: 2,
-      textTransform: "uppercase",
-      letterSpacing: "2px",
+      textTransform: "capitalize",
       width: ["100%", "auto"],
       mt: [3, "auto"]
     }

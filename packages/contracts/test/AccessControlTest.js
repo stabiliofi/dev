@@ -10,19 +10,19 @@ const toBN = th.toBN
 const assertRevert = th.assertRevert
 
 /* The majority of access control tests are contained in this file. However, tests for restrictions 
-on the Liquity admin address's capabilities during the first year are found in:
+on the Stabilio admin address's capabilities during the first year are found in:
 
 test/launchSequenceTest/DuringLockupPeriodTest.js */
 
-contract('Access Control: Liquity functions with the caller restricted to Liquity contract(s)', async accounts => {
+contract('Access Control: Stabilio functions with the caller restricted to Stabilio contract(s)', async accounts => {
 
   const [owner, alice, bob, carol] = accounts;
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
+  const [bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig] = accounts.slice(994, 1000)
 
   let coreContracts
 
   let priceFeed
-  let lusdToken
+  let xbrlToken
   let sortedTroves
   let troveManager
   let nameRegistry
@@ -32,19 +32,19 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let functionCaller
   let borrowerOperations
 
-  let lqtyStaking
-  let lqtyToken
+  let stblStaking
+  let stblToken
   let communityIssuance
   let lockupContractFactory
 
   before(async () => {
-    coreContracts = await deploymentHelper.deployLiquityCore()
+    coreContracts = await deploymentHelper.deployStabilioCore()
     coreContracts.troveManager = await TroveManagerTester.new()
-    coreContracts = await deploymentHelper.deployLUSDTokenTester(coreContracts)
-    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisig)
+    coreContracts = await deploymentHelper.deployXBRLTokenTester(coreContracts)
+    const STBLContracts = await deploymentHelper.deploySTBLTesterContractsHardhat(bountyAddress, xbrlWethLpRewardsAddress, xbrlStblLpRewardsAddress, momentZeroMultisig, sixMonthsMultisig, oneYearMultisig)
     
     priceFeed = coreContracts.priceFeed
-    lusdToken = coreContracts.lusdToken
+    xbrlToken = coreContracts.xbrlToken
     sortedTroves = coreContracts.sortedTroves
     troveManager = coreContracts.troveManager
     nameRegistry = coreContracts.nameRegistry
@@ -54,23 +54,23 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     functionCaller = coreContracts.functionCaller
     borrowerOperations = coreContracts.borrowerOperations
 
-    lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
-    lockupContractFactory = LQTYContracts.lockupContractFactory
+    stblStaking = STBLContracts.stblStaking
+    stblToken = STBLContracts.stblToken
+    communityIssuance = STBLContracts.communityIssuance
+    lockupContractFactory = STBLContracts.lockupContractFactory
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, coreContracts)
+    await deploymentHelper.connectSTBLContracts(STBLContracts)
+    await deploymentHelper.connectCoreContracts(coreContracts, STBLContracts)
+    await deploymentHelper.connectSTBLContractsToCore(STBLContracts, coreContracts)
 
     for (account of accounts.slice(0, 10)) {
-      await th.openTrove(coreContracts, { extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
+      await th.openTrove(coreContracts, { extraXBRLAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
     }
 
     const expectedCISupplyCap = '32000000000000000000000000' // 32mil
 
     // Check CI has been properly funded
-    const bal = await lqtyToken.balanceOf(communityIssuance.address)
+    const bal = await stblToken.balanceOf(communityIssuance.address)
     assert.equal(bal, expectedCISupplyCap)
   })
 
@@ -233,11 +233,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       }
     })
 
-    // increaseLUSD	
-    it("increaseLUSDDebt(): reverts when called by an account that is not BO nor TroveM", async () => {
+    // increaseXBRL	
+    it("increaseXBRLDebt(): reverts when called by an account that is not BO nor TroveM", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await activePool.increaseLUSDDebt(100, { from: alice })
+        const txAlice = await activePool.increaseXBRLDebt(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -245,11 +245,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       }
     })
 
-    // decreaseLUSD
-    it("decreaseLUSDDebt(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
+    // decreaseXBRL
+    it("decreaseXBRLDebt(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await activePool.decreaseLUSDDebt(100, { from: alice })
+        const txAlice = await activePool.decreaseXBRLDebt(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -283,11 +283,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       }
     })
 
-    // increaseLUSD	
-    it("increaseLUSDDebt(): reverts when called by an account that is not TroveManager", async () => {
+    // increaseXBRL	
+    it("increaseXBRLDebt(): reverts when called by an account that is not TroveManager", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await defaultPool.increaseLUSDDebt(100, { from: alice })
+        const txAlice = await defaultPool.increaseXBRLDebt(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -295,11 +295,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       }
     })
 
-    // decreaseLUSD	
-    it("decreaseLUSD(): reverts when called by an account that is not TroveManager", async () => {
+    // decreaseXBRL	
+    it("decreaseXBRL(): reverts when called by an account that is not TroveManager", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await defaultPool.decreaseLUSDDebt(100, { from: alice })
+        const txAlice = await defaultPool.decreaseXBRLDebt(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -350,20 +350,20 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
   })
 
-  describe('LUSDToken', async accounts => {
+  describe('XBRLToken', async accounts => {
 
     //    mint
     it("mint(): reverts when called by an account that is not BorrowerOperations", async () => {
       // Attempt call from alice
-      const txAlice = lusdToken.mint(bob, 100, { from: alice })
-      await th.assertRevert(txAlice, "Caller is not BorrowerOperations")
+      const txAlice = xbrlToken.mint(bob, 100, { from: alice })
+      await th.assertRevert(txAlice, "XBRLToken: Caller not allowed to mint")
     })
 
     // burn
     it("burn(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await lusdToken.burn(bob, 100, { from: alice })
+        const txAlice = await xbrlToken.burn(bob, 100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -375,11 +375,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     it("sendToPool(): reverts when called by an account that is not StabilityPool", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await lusdToken.sendToPool(bob, activePool.address, 100, { from: alice })
+        const txAlice = await xbrlToken.sendToPool(bob, activePool.address, 100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
-        assert.include(err.message, "Caller is not the StabilityPool")
+        assert.include(err.message, "XBRLToken: Caller not allowed to burn")
       }
     })
 
@@ -387,7 +387,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     it("returnFromPool(): reverts when called by an account that is not TroveManager nor StabilityPool", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await lusdToken.returnFromPool(activePool.address, bob, 100, { from: alice })
+        const txAlice = await xbrlToken.returnFromPool(activePool.address, bob, 100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -438,40 +438,40 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('LockupContract', async accounts => {
-    it("withdrawLQTY(): reverts when caller is not beneficiary", async () => {
+    it("withdrawSTBL(): reverts when caller is not beneficiary", async () => {
       // deploy new LC with Carol as beneficiary
-      const unlockTime = (await lqtyToken.getDeploymentStartTime()).add(toBN(timeValues.SECONDS_IN_ONE_YEAR))
-      const deployedLCtx = await lockupContractFactory.deployLockupContract(
+      const unlockTime = (await stblToken.getDeploymentStartTime()).add(toBN(timeValues.SECONDS_IN_ONE_YEAR))
+      const deployedLCtx = await lockupContractFactory.deployOneYearLockupContract(
         carol, 
         unlockTime,
         { from: owner })
 
       const LC = await th.getLCFromDeploymentTx(deployedLCtx)
 
-      // LQTY Multisig funds the LC
-      await lqtyToken.transfer(LC.address, dec(100, 18), { from: multisig })
+      // STBL Multisig funds the LC
+      await stblToken.transfer(LC.address, dec(100, 18), { from: oneYearMultisig })
 
       // Fast-forward one year, so that beneficiary can withdraw
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
-      // Bob attempts to withdraw LQTY
+      // Bob attempts to withdraw STBL
       try {
-        const txBob = await LC.withdrawLQTY({ from: bob })
+        const txBob = await LC.withdrawSTBL({ from: bob })
         
       } catch (err) {
         assert.include(err.message, "revert")
       }
 
       // Confirm beneficiary, Carol, can withdraw
-      const txCarol = await LC.withdrawLQTY({ from: carol })
+      const txCarol = await LC.withdrawSTBL({ from: carol })
       assert.isTrue(txCarol.receipt.status)
     })
   })
 
-  describe('LQTYStaking', async accounts => {
-    it("increaseF_LUSD(): reverts when caller is not TroveManager", async () => {
+  describe('STBLStaking', async accounts => {
+    it("increaseF_XBRL(): reverts when caller is not TroveManager", async () => {
       try {
-        const txAlice = await lqtyStaking.increaseF_LUSD(dec(1, 18), { from: alice })
+        const txAlice = await stblStaking.increaseF_XBRL(dec(1, 18), { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -479,14 +479,14 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
   })
 
-  describe('LQTYToken', async accounts => {
-    it("sendToLQTYStaking(): reverts when caller is not the LQTYSstaking", async () => {
-      // Check multisig has some LQTY
-      assert.isTrue((await lqtyToken.balanceOf(multisig)).gt(toBN('0')))
+  describe('STBLToken', async accounts => {
+    it("sendToSTBLStaking(): reverts when caller is not the STBLSstaking", async () => {
+      // Check multisig has some STBL
+      assert.isTrue((await stblToken.balanceOf(oneYearMultisig)).gt(toBN('0')))
 
       // multisig tries to call it
       try {
-        const tx = await lqtyToken.sendToLQTYStaking(multisig, 1, { from: multisig })
+        const tx = await stblToken.sendToSTBLStaking(oneYearMultisig, 1, { from: oneYearMultisig })
       } catch (err) {
         assert.include(err.message, "revert")
       }
@@ -494,13 +494,13 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       // FF >> time one year
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
-      // Owner transfers 1 LQTY to bob
-      await lqtyToken.transfer(bob, dec(1, 18), { from: multisig })
-      assert.equal((await lqtyToken.balanceOf(bob)), dec(1, 18))
+      // Owner transfers 1 STBL to bob
+      await stblToken.transfer(bob, dec(1, 18), { from: oneYearMultisig })
+      assert.equal((await stblToken.balanceOf(bob)), dec(1, 18))
 
       // Bob tries to call it
       try {
-        const tx = await lqtyToken.sendToLQTYStaking(bob, dec(1, 18), { from: bob })
+        const tx = await stblToken.sendToSTBLStaking(bob, dec(1, 18), { from: bob })
       } catch (err) {
         assert.include(err.message, "revert")
       }
@@ -508,18 +508,18 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('CommunityIssuance', async accounts => {
-    it("sendLQTY(): reverts when caller is not the StabilityPool", async () => {
-      const tx1 = communityIssuance.sendLQTY(alice, dec(100, 18), {from: alice})
-      const tx2 = communityIssuance.sendLQTY(bob, dec(100, 18), {from: alice})
-      const tx3 = communityIssuance.sendLQTY(stabilityPool.address, dec(100, 18), {from: alice})
+    it("sendSTBL(): reverts when caller is not the StabilityPool", async () => {
+      const tx1 = communityIssuance.sendSTBL(alice, dec(100, 18), {from: alice})
+      const tx2 = communityIssuance.sendSTBL(bob, dec(100, 18), {from: alice})
+      const tx3 = communityIssuance.sendSTBL(stabilityPool.address, dec(100, 18), {from: alice})
      
       assertRevert(tx1)
       assertRevert(tx2)
       assertRevert(tx3)
     })
 
-    it("issueLQTY(): reverts when caller is not the StabilityPool", async () => {
-      const tx1 = communityIssuance.issueLQTY({from: alice})
+    it("issueSTBL(): reverts when caller is not the StabilityPool", async () => {
+      const tx1 = communityIssuance.issueSTBL({from: alice})
 
       assertRevert(tx1)
     })

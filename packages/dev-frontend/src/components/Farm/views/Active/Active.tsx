@@ -1,36 +1,36 @@
 import React, { useCallback } from "react";
 import { Card, Heading, Box, Flex, Button } from "theme-ui";
 import { LP, GT } from "../../../../strings";
-import { LiquityStoreState } from "@liquity/lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { StabilioStoreState } from "@stabilio/lib-base";
+import { useStabilioSelector } from "@stabilio/lib-react";
 import { Icon } from "../../../Icon";
 import { LoadingOverlay } from "../../../LoadingOverlay";
 import { useMyTransactionState } from "../../../Transaction";
 import { DisabledEditableRow, StaticRow } from "../../../Trove/Editor";
 import { useFarmView } from "../../context/FarmViewContext";
-import { RemainingLQTY } from "../RemainingLQTY";
+import { RemainingSTBL } from "../RemainingSTBL";
 import { ClaimReward } from "./ClaimReward";
 import { UnstakeAndClaim } from "../UnstakeAndClaim";
 import { Yield } from "../Yield";
 
 const selector = ({
-  liquidityMiningStake,
-  liquidityMiningLQTYReward,
-  totalStakedUniTokens
-}: LiquityStoreState) => ({
-  liquidityMiningStake,
-  liquidityMiningLQTYReward,
-  totalStakedUniTokens
+  xbrlWethLiquidityMiningStake,
+  xbrlWethLiquidityMiningSTBLReward,
+  totalStakedXbrlWethUniTokens
+}: StabilioStoreState) => ({
+  xbrlWethLiquidityMiningStake,
+  xbrlWethLiquidityMiningSTBLReward,
+  totalStakedXbrlWethUniTokens
 });
 const transactionId = /farm-/i;
 
 export const Active: React.FC = () => {
   const { dispatchEvent } = useFarmView();
   const {
-    liquidityMiningStake,
-    liquidityMiningLQTYReward,
-    totalStakedUniTokens
-  } = useLiquitySelector(selector);
+    xbrlWethLiquidityMiningStake,
+    xbrlWethLiquidityMiningSTBLReward,
+    totalStakedXbrlWethUniTokens
+  } = useStabilioSelector(selector);
 
   const handleAdjustPressed = useCallback(() => {
     dispatchEvent("ADJUST_PRESSED");
@@ -41,25 +41,27 @@ export const Active: React.FC = () => {
     transactionState.type === "waitingForApproval" ||
     transactionState.type === "waitingForConfirmation";
 
-  const poolShare = liquidityMiningStake.mulDiv(100, totalStakedUniTokens);
-  const hasStakeAndRewards = !liquidityMiningStake.isZero && !liquidityMiningLQTYReward.isZero;
+  const poolShare = xbrlWethLiquidityMiningStake.mulDiv(100, totalStakedXbrlWethUniTokens);
+  const hasStakeAndRewards = !xbrlWethLiquidityMiningStake.isZero && !xbrlWethLiquidityMiningSTBLReward.isZero;
 
   return (
     <Card>
-      <Heading>
-        Uniswap Liquidity Farm
+      <Flex sx={{ justifyContent: "space-between", width: "100%", px: [2, 3], pt: 3, pb: 2 }}>
+        <Heading sx={{ fontSize: 16  }}>
+          ETH/xBRL Uniswap LP
+        </Heading>
         {!isTransactionPending && (
           <Flex sx={{ justifyContent: "flex-end" }}>
-            <RemainingLQTY />
+            <RemainingSTBL />
           </Flex>
         )}
-      </Heading>
+      </Flex>
       <Box sx={{ p: [2, 3] }}>
         <Box>
           <DisabledEditableRow
             label="Stake"
             inputId="farm-stake"
-            amount={liquidityMiningStake.prettify(4)}
+            amount={xbrlWethLiquidityMiningStake.prettify(4)}
             unit={LP}
           />
           {poolShare.infinite ? (
@@ -76,8 +78,8 @@ export const Active: React.FC = () => {
             <StaticRow
               label="Reward"
               inputId="farm-reward"
-              amount={liquidityMiningLQTYReward.prettify(4)}
-              color={liquidityMiningLQTYReward.nonZero && "success"}
+              amount={xbrlWethLiquidityMiningSTBLReward.prettify(4)}
+              color={xbrlWethLiquidityMiningSTBLReward.nonZero && "success"}
               unit={GT}
             />
             <Flex sx={{ justifyContent: "flex-end", flex: 1 }}>
@@ -88,13 +90,13 @@ export const Active: React.FC = () => {
 
         <Flex variant="layout.actions">
           <Button
-            variant={!liquidityMiningLQTYReward.isZero ? "outline" : "primary"}
+            variant={!xbrlWethLiquidityMiningSTBLReward.isZero ? "outline" : "primary"}
             onClick={handleAdjustPressed}
           >
             <Icon name="pen" size="sm" />
             &nbsp;Adjust
           </Button>
-          {!liquidityMiningLQTYReward.isZero && <ClaimReward />}
+          {!xbrlWethLiquidityMiningSTBLReward.isZero && <ClaimReward />}
         </Flex>
         <Flex>{hasStakeAndRewards && <UnstakeAndClaim />}</Flex>
       </Box>
