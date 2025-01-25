@@ -98,5 +98,10 @@
     "prettier": "^2.1.2",
     "semantic-release": "^17.4.2",
     "semantic-release-monorepo": "^7.0.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "ipfs-http-client@34.0.0>concat-stream": "github:mihirgupta0900/concat-stream#master"
+    }
   }
 }
