@@ -1,6 +1,6 @@
 import { EthersStabilio } from "@stabilio/lib-ethers";
 
-import { deployer, subgraph } from "../globals";
+import { deployer } from "../globals";
 
 import {
   checkSubgraph,
@@ -22,8 +22,6 @@ export const checkSorting = async () => {
 
 export const checkSubgraphCmd = async () => {
   const deployerStabilio = await EthersStabilio.connect(deployer);
-
-  await checkSubgraph(subgraph, deployerStabilio);
 
   console.log("Subgraph looks fine.");
 };

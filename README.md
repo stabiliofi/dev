@@ -264,7 +264,6 @@ Economically, Recovery Mode is designed to encourage collateral top-ups and debt
 - `packages/lib-react/` - Components and hooks that React-based apps can use to view Stabilio contract state
 - `packages/lib-subgraph/` - [Apollo Client](https://github.com/apollographql/apollo-client)-based middleware backed by the Stabilio subgraph that can read Stabilio state
 - `packages/providers/` - Subclassed Ethers providers used by the frontend
-- `packages/subgraph/` - [Subgraph](https://thegraph.com) for querying Stabilio state as well as historical data like transaction history
 - `packages/contracts/` - The backend development folder, contains the Hardhat project, contracts and tests
 - `packages/contracts/contracts/` - The core back end smart contracts written in Solidity
 - `packages/contracts/test/` - JS test suite for the system. Tests run in Mocha/Chai

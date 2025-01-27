@@ -9,7 +9,7 @@ import {
 } from "@stabilio/lib-base";
 
 import { Fixture } from "../fixture";
-import { deployer, funder, provider, subgraph } from "../globals";
+import { deployer, funder, provider } from "../globals";
 
 import {
   checkPoolBalances,
@@ -111,12 +111,6 @@ export const chaos = async ({
       await checkPoolBalances(deployerStabilio, listOfTroves, totalRedistributed);
 
       previousListOfTroves = listOfTroves;
-    }
-
-    if (shouldCheckSubgraph) {
-      const blockNumber = await provider.getBlockNumber();
-      await subgraph.waitForBlock(blockNumber);
-      await checkSubgraph(subgraph, deployerStabilio);
     }
   }
 
